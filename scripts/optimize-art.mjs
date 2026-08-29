@@ -12,9 +12,9 @@ for (const f of readdirSync(SRC).filter((n) => n.endsWith('.png'))) {
   console.log(name + '.webp');
 }
 // 社群分享預覽圖（og:image 用，Task 9 引用；palette PNG 壓縮避免 LINE/FB 爬蟲抓圖過重被跳過）
-// quality:80 仍達 574KB，超過 500KB 守門；降至 60 並拉高壓縮層級後為 432KB，留有餘裕
+// quality 參數對此圖無效（南天門封面仍 554KB）；改限制調色盤 128 色後約 246KB，留有餘裕
 await sharp(`${SRC}/cover.png`)
   .resize(1200, 630, { fit: 'cover' })
-  .png({ palette: true, quality: 45, compressionLevel: 9, effort: 10 })
+  .png({ palette: true, colours: 128, compressionLevel: 9, effort: 10 })
   .toFile('assets/og.png');
 console.log('assets/og.png');
