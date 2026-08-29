@@ -21,7 +21,7 @@ function stateWith(wu, karmaDelta) {
   s.wuMax = 100;
   creditWu(s, 'x', wu);
   if (karmaDelta) {
-    recordChoice(s, { screen: 'hall4', scene: 'hall4', text: 'x', axis: 'mercy', delta: karmaDelta });
+    recordChoice(s, { screen: 'hall4', scene: 'hall4', text: 'x', axis: 'ren', delta: karmaDelta });
   }
   return s;
 }
@@ -69,28 +69,28 @@ describe('孟婆亭', () => {
 describe('孽鏡反照資料', () => {
   function journeyState() {
     const s = createState();
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '早市多找的錢', text: '退還', axis: 'honesty', delta: 1, weight: 2 });
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '群組裡的謠言', text: '轉傳', axis: 'speech', delta: -1, weight: 2 });
-    recordChoice(s, { screen: 'hall4', scene: 'hall4', text: '別過頭去', axis: 'mercy', delta: -1 });
-    recordChoice(s, { screen: 'hall5', scene: 'hall5-lookout', text: '深深一揖', axis: 'filial', delta: 1 });
+    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '早市多找的錢', text: '退還', axis: 'xin', delta: 1, weight: 2 });
+    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '群組裡的謠言', text: '轉傳', axis: 'li', delta: -1, weight: 2 });
+    recordChoice(s, { screen: 'hall4', scene: 'hall4', text: '別過頭去', axis: 'ren', delta: -1 });
+    recordChoice(s, { screen: 'hall5', scene: 'hall5-lookout', text: '深深一揖', axis: 'ren', delta: 1 });
     return s;
   }
   it('prologueReplay 只取序章、依序；journeyTally 只計旅途', () => {
     const s = journeyState();
-    expect(prologueReplay(s).map((c) => c.axis)).toEqual(['honesty', 'speech']);
+    expect(prologueReplay(s).map((c) => c.axis)).toEqual(['xin', 'li']);
     expect(journeyTally(s)).toEqual({ good: 1, evil: 1 });
   });
   it('prologueReplay 以 PROLOGUE_ID（screen 欄位）過濾', () => {
     const s = createState();
-    recordChoice(s, { screen: PROLOGUE_ID, scene: PROLOGUE_ID, label: '早市', text: 'a', axis: 'honesty', delta: 1 });
-    recordChoice(s, { screen: 'hall3', scene: 'hall3-gossip', text: 'b', axis: 'speech', delta: -1 });
+    recordChoice(s, { screen: PROLOGUE_ID, scene: PROLOGUE_ID, label: '早市', text: 'a', axis: 'xin', delta: 1 });
+    recordChoice(s, { screen: 'hall3', scene: 'hall3-gossip', text: 'b', axis: 'li', delta: -1 });
     expect(prologueReplay(s).length).toBe(1);
   });
   it('worstPrologueChoice 取序章第一筆惡選；全善回 null', () => {
     const s = journeyState();
     expect(worstPrologueChoice(s).text).toBe('轉傳');
     const good = createState();
-    recordChoice(good, { screen: 'prologue', scene: 'prologue', text: 'x', axis: 'mercy', delta: 1, weight: 2 });
+    recordChoice(good, { screen: 'prologue', scene: 'prologue', text: 'x', axis: 'ren', delta: 1, weight: 2 });
     expect(worstPrologueChoice(good)).toBeNull();
   });
   it('endingQuote：代入 label/text；無惡選用 fallback；無 quote 回 null', () => {
@@ -98,7 +98,7 @@ describe('孽鏡反照資料', () => {
     const s = journeyState();
     expect(endingQuote(ending, s)).toBe('群組裡的謠言——你選的是「轉傳」。');
     const good = createState();
-    recordChoice(good, { screen: 'prologue', scene: 'prologue', text: 'x', axis: 'mercy', delta: 1, weight: 2 });
+    recordChoice(good, { screen: 'prologue', scene: 'prologue', text: 'x', axis: 'ren', delta: 1, weight: 2 });
     expect(endingQuote(ending, good)).toBe('陽間那日你走得端正。');
     expect(endingQuote({ title: 't' }, s)).toBeNull();
   });

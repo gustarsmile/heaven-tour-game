@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
-  AXES, AXIS_LABELS, createState, creditWu, resetScreen, rawWu, recordChoice,
-  karmaSum, karmaByAxis, karmaVerdict, karmaPenalty, finalWu,
+  AXES, AXIS_LABELS, createState, creditWu, resetScreen, rawWu, recordChoice, setRepent,
+  karmaSum, karmaByAxis, karmaPenalty, finalWu,
   serialize, deserialize, save, load, clearSave,
 } from '../js/state.js';
 import { KARMA_PENALTY } from '../js/config.js';
@@ -16,57 +16,64 @@ function fakeStorage() {
 }
 
 describe('state 基本結構', () => {
-  it('初始狀態：無得分、無選擇、畫面 prologue、預設完整模式', () => {
+  it('初始狀態：無得分、無選擇、無補過、畫面 prologue、預設完整模式', () => {
     const s = createState();
     expect(s.wuByScreen).toEqual({});
     expect(s.choices).toEqual([]);
+    expect(s.repent).toBeNull();
     expect(s.progress.screen).toBe('prologue');
     expect(s.mode).toBe('full');
     expect(s.wuMax).toBe(0);
   });
-  it('四軸鍵名與標籤固定', () => {
-    expect(AXES).toEqual(['honesty', 'speech', 'filial', 'mercy']);
-    expect(AXIS_LABELS.speech).toBe('口業');
+  it('五常五軸鍵名與標籤固定', () => {
+    expect(AXES).toEqual(['ren', 'yi', 'li', 'zhi', 'xin']);
+    expect(AXIS_LABELS).toEqual({ ren: '仁', yi: '義', li: '禮', zhi: '智', xin: '信' });
   });
 });
 
-describe('分殿計分', () => {
-  it('creditWu 分殿累加，rawWu 加總', () => {
+describe('分站計分', () => {
+  it('creditWu 分站累加，rawWu 加總', () => {
     const s = createState();
-    creditWu(s, 'hall1', 10);
-    creditWu(s, 'hall1', 5);
-    creditWu(s, 'hall2', 5);
-    expect(s.wuByScreen).toEqual({ hall1: 15, hall2: 5 });
-    expect(rawWu(s)).toBe(20);
+    creditWu(s, 'gate', 5);
+    creditWu(s, 'gate', 5);
+    creditWu(s, 'donghua', 20);
+    expect(s.wuByScreen).toEqual({ gate: 10, donghua: 20 });
+    expect(rawWu(s)).toBe(30);
   });
-  it('resetScreen 清該殿得分與選擇（重玩不灌分）', () => {
+  it('resetScreen 清該站得分、選擇與該站的補過（重玩不灌分）', () => {
     const s = createState();
-    creditWu(s, 'hall1', 30);
-    creditWu(s, 'hall2', 5);
-    recordChoice(s, { screen: 'hall1', scene: 'hall1-merchant', text: 'a', axis: 'honesty', delta: -1 });
-    recordChoice(s, { screen: 'hall2', scene: 'hall2', text: 'b', axis: 'speech', delta: 1 });
-    resetScreen(s, 'hall1');
+    creditWu(s, 'gate', 5);
+    creditWu(s, 'donghua', 5);
+    recordChoice(s, { screen: 'gate', scene: 'gate', text: 'a', axis: 'li', delta: -1 });
+    recordChoice(s, { screen: 'donghua', scene: 'donghua', text: 'b', axis: 'ren', delta: 1 });
+    setRepent(s, 'li', 'sanguan');
+    resetScreen(s, 'gate');
     expect(rawWu(s)).toBe(5);
-    expect(s.choices.map((c) => c.screen)).toEqual(['hall2']);
+    expect(s.choices.map((c) => c.screen)).toEqual(['donghua']);
+    expect(s.repent).toEqual({ axis: 'li', screen: 'sanguan' });
+    resetScreen(s, 'sanguan');
+    expect(s.repent).toBeNull();
   });
 });
 
 describe('悟性值 finalWu（正規化＋心性扣分）', () => {
   it('依 wuMax 折算百分制', () => {
     const s = createState();
-    s.wuMax = 145;
-    creditWu(s, 'x', 145);
+    s.wuMax = 45;
+    creditWu(s, 'x', 45);
     expect(finalWu(s)).toBe(100);
     resetScreen(s, 'x');
-    creditWu(s, 'x', 105);
-    expect(finalWu(s)).toBe(72); // round(105/145*100)
+    creditWu(s, 'x', 30);
+    expect(finalWu(s)).toBe(67); // round(30/45*100)
   });
-  it('每筆惡選依權重扣分', () => {
+  it('每筆惡選依權重扣分；補過不退還扣分', () => {
     const s = createState();
     s.wuMax = 100;
     creditWu(s, 'x', 100);
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', text: 'a', axis: 'honesty', delta: -1, weight: 2 });
-    recordChoice(s, { screen: 'hall4', scene: 'hall4', text: 'b', axis: 'mercy', delta: -1 });
+    recordChoice(s, { screen: 'prologue', scene: 'prologue', text: 'a', axis: 'xin', delta: -1, weight: 2 });
+    recordChoice(s, { screen: 'gate', scene: 'gate', text: 'b', axis: 'li', delta: -1 });
+    expect(karmaPenalty(s)).toBe(3 * KARMA_PENALTY);
+    setRepent(s, 'xin', 'sanguan');
     expect(karmaPenalty(s)).toBe(3 * KARMA_PENALTY);
     expect(finalWu(s)).toBe(100 - 3 * KARMA_PENALTY);
   });
@@ -75,7 +82,7 @@ describe('悟性值 finalWu（正規化＋心性扣分）', () => {
     s.wuMax = 10;
     creditWu(s, 'x', 1);
     for (let i = 0; i < 10; i++) {
-      recordChoice(s, { screen: 'p', scene: 'p', text: 'a', axis: 'mercy', delta: -1, weight: 2 });
+      recordChoice(s, { screen: 'p', scene: 'p', text: 'a', axis: 'ren', delta: -1, weight: 2 });
     }
     expect(finalWu(s)).toBe(0);
     const t = createState();
@@ -84,45 +91,66 @@ describe('悟性值 finalWu（正規化＋心性扣分）', () => {
   });
 });
 
-describe('心性檔案（由選擇推導）', () => {
-  it('karmaByAxis／karmaSum 含權重', () => {
+describe('五軸心性（由選擇推導）', () => {
+  it('karmaByAxis 五軸齊備、含權重；karmaSum 加總；不含補過', () => {
     const s = createState();
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', text: 'a', axis: 'honesty', delta: 1, weight: 2 });
-    recordChoice(s, { screen: 'hall4', scene: 'hall4', text: 'b', axis: 'mercy', delta: -1 });
-    expect(karmaByAxis(s).honesty).toBe(2);
-    expect(karmaByAxis(s).mercy).toBe(-1);
+    recordChoice(s, { screen: 'prologue', scene: 'prologue', text: 'a', axis: 'ren', delta: 1, weight: 2 });
+    recordChoice(s, { screen: 'gate', scene: 'gate', text: 'b', axis: 'li', delta: -1 });
+    setRepent(s, 'li', 'sanguan');
+    expect(karmaByAxis(s)).toEqual({ ren: 2, yi: 0, li: -1, zhi: 0, xin: 0 });
     expect(karmaSum(s)).toBe(1);
   });
-  it('總和 0 判善、負判惡', () => {
+  it('recordChoice／setRepent 拒絕未知心性軸', () => {
     const s = createState();
-    expect(karmaVerdict(s)).toBe('good');
-    recordChoice(s, { screen: 'hall3', scene: 'hall3', text: 'b', axis: 'speech', delta: -1 });
-    expect(karmaVerdict(s)).toBe('bad');
+    expect(() => recordChoice(s, { screen: 'x', scene: 'x', text: 't', axis: 'honesty', delta: 1 })).toThrow(/未知的心性軸/);
+    expect(() => setRepent(s, 'luck', 'sanguan')).toThrow(/未知的心性軸/);
+  });
+  it('recordChoice 追加，label/weight 有預設值', () => {
+    const s = createState();
+    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '清晨・隔壁的信箱', text: '敲敲門', axis: 'ren', delta: 1, weight: 2 });
+    recordChoice(s, { screen: 'gate', scene: 'gate', text: '見怪', axis: 'li', delta: -1 });
+    expect(s.choices[0].weight).toBe(2);
+    expect(s.choices[1]).toEqual({ screen: 'gate', scene: 'gate', label: null, text: '見怪', axis: 'li', delta: -1, weight: 1 });
   });
 });
 
 describe('存讀檔', () => {
-  it('serialize/deserialize 往返', () => {
+  it('serialize/deserialize 往返（含 repent）', () => {
     const s = createState('lite');
-    creditWu(s, 'hall1', 30);
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', text: 'x', axis: 'filial', delta: 1, weight: 2 });
-    s.progress.screen = 'hall1';
-    const r = deserialize(serialize(s));
-    expect(r).toEqual(s);
+    creditWu(s, 'gate', 5);
+    recordChoice(s, { screen: 'prologue', scene: 'prologue', text: 'x', axis: 'xin', delta: 1, weight: 2 });
+    setRepent(s, 'xin', 'sanguan');
+    s.progress.screen = 'gate';
+    expect(deserialize(serialize(s))).toEqual(s);
   });
-  it('save/load 經 storage 往返，無檔回 null', () => {
+  it('舊格式無 choices／repent 補預設；損壞型別補預設', () => {
+    const legacy = JSON.parse(serialize(createState()));
+    delete legacy.choices;
+    delete legacy.repent;
+    const r = deserialize(JSON.stringify(legacy));
+    expect(r.choices).toEqual([]);
+    expect(r.repent).toBeNull();
+    legacy.choices = 'oops';
+    legacy.repent = 'oops';
+    const r2 = deserialize(JSON.stringify(legacy));
+    expect(r2.choices).toEqual([]);
+    expect(r2.repent).toBeNull();
+  });
+  it('save/load 經 storage 往返，無檔回 null；鍵為 heavenTourSave.v1', () => {
     const st = fakeStorage();
     expect(load(st)).toBeNull();
     const s = createState();
-    creditWu(s, 'hall1', 25);
+    creditWu(s, 'gate', 5);
     save(s, st);
+    expect(st.getItem('heavenTourSave.v1')).not.toBeNull();
     expect(load(st)).toEqual(s);
     clearSave(st);
     expect(load(st)).toBeNull();
   });
-  it('load 讀到損壞 JSON 回 null 並清除存檔', () => {
+  it('load 讀到損壞 JSON 回 null 並清除存檔；地獄篇舊鍵不理會', () => {
     const st = fakeStorage();
     st.setItem('heavenTourSave.v1', '{oops');
+    st.setItem('hellTourSave.v3', JSON.stringify(createState()));
     expect(load(st)).toBeNull();
     expect(st.getItem('heavenTourSave.v1')).toBeNull();
   });
@@ -135,38 +163,5 @@ describe('存讀檔', () => {
     expect(() => save(createState(), boom)).not.toThrow();
     expect(load(boom)).toBeNull();
     expect(() => clearSave(boom)).not.toThrow();
-  });
-  it('save 寫入 heavenTourSave.v1，且不理會地獄篇舊鍵', () => {
-    const st = fakeStorage();
-    st.setItem('hellTourSave.v3', JSON.stringify(createState()));
-    expect(load(st)).toBeNull();
-    save(createState(), st);
-    expect(st.getItem('heavenTourSave.v1')).not.toBeNull();
-  });
-});
-
-describe('選擇紀錄（階段3）', () => {
-  it('初始 choices 為空；recordChoice 追加，label/weight 有預設值', () => {
-    const s = createState();
-    expect(s.choices).toEqual([]);
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '早市多找的錢', text: '收進口袋', axis: 'honesty', delta: -1, weight: 2 });
-    recordChoice(s, { screen: 'hall4', scene: 'hall4', text: '別過頭去', axis: 'mercy', delta: -1 });
-    expect(s.choices.length).toBe(2);
-    expect(s.choices[0].weight).toBe(2);
-    expect(s.choices[1]).toEqual({ screen: 'hall4', scene: 'hall4', label: null, text: '別過頭去', axis: 'mercy', delta: -1, weight: 1 });
-  });
-  it('recordChoice 拒絕未知心性軸', () => {
-    const s = createState();
-    expect(() => recordChoice(s, { screen: 'x', scene: 'x', text: 't', axis: 'luck', delta: 1 })).toThrow(/未知的心性軸/);
-  });
-  it('serialize/deserialize 保留 choices；舊格式無 choices 補空陣列；損壞型別補空陣列', () => {
-    const s = createState();
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', text: 'x', axis: 'mercy', delta: 1, weight: 2 });
-    expect(deserialize(serialize(s)).choices).toEqual(s.choices);
-    const legacy = JSON.parse(serialize(createState()));
-    delete legacy.choices;
-    expect(deserialize(JSON.stringify(legacy)).choices).toEqual([]);
-    legacy.choices = 'oops';
-    expect(deserialize(JSON.stringify(legacy)).choices).toEqual([]);
   });
 });

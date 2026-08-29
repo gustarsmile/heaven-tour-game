@@ -120,9 +120,9 @@ const mercyVisit = {
   mercy: {
     prompt: 'P',
     choices: [
-      { text: '善', karma: { axis: 'mercy', delta: 1 }, reply: 'r1' },
+      { text: '善', karma: { axis: 'ren', delta: 1 }, reply: 'r1' },
       { text: '中', reply: 'r2' },
-      { text: '惡', karma: { axis: 'mercy', delta: -1 }, reply: 'r3' },
+      { text: '惡', karma: { axis: 'ren', delta: -1 }, reply: 'r3' },
     ],
   },
 };
@@ -230,7 +230,7 @@ describe('finaleView', () => {
     const s = createState();
     s.wuMax = 100;
     creditWu(s, 'x', 88);
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '早市多找的錢', text: '收進口袋——是他自己找錯的', axis: 'honesty', delta: -1, weight: 2 });
+    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '早市多找的錢', text: '收進口袋——是他自己找錯的', axis: 'xin', delta: -1, weight: 2 });
     return s;
   }
   it('mengpo 未選時渲染兩選項；選後顯示 reply 與繼續鈕', () => {

@@ -16,9 +16,9 @@ const mercyVisit = {
   mercy: {
     prompt: 'P',
     choices: [
-      { text: '善', karma: { axis: 'mercy', delta: 1 }, reply: 'r1' },
+      { text: '善', karma: { axis: 'ren', delta: 1 }, reply: 'r1' },
       { text: '中', reply: 'r2' },
-      { text: '惡', karma: { axis: 'mercy', delta: -1 }, reply: 'r3' },
+      { text: '惡', karma: { axis: 'ren', delta: -1 }, reply: 'r3' },
     ],
   },
 };
@@ -74,7 +74,7 @@ describe('chooseMercy', () => {
     const v = createVisit(mercyVisit, { onKarma });
     nextVisitPhase(v);
     expect(chooseMercy(v, 0)).toEqual({ reply: 'r1' });
-    expect(onKarma).toHaveBeenCalledWith('mercy', 1, 1);
+    expect(onKarma).toHaveBeenCalledWith('ren', 1, 1);
     expect(chooseMercy(v, 2)).toEqual({ reply: 'r1' });
     expect(onKarma).toHaveBeenCalledTimes(1);
   });
@@ -109,8 +109,8 @@ describe('visit onChoice 紀錄（階段3）', () => {
       mercy: {
         prompt: 'P',
         choices: [
-          { text: '善', karma: { axis: 'mercy', delta: 1 }, reply: 'r1' },
-          { text: '惡', karma: { axis: 'mercy', delta: -1 }, reply: 'r3' },
+          { text: '善', karma: { axis: 'ren', delta: 1 }, reply: 'r1' },
+          { text: '惡', karma: { axis: 'ren', delta: -1 }, reply: 'r3' },
         ],
       },
       closing: 'x',
@@ -120,7 +120,7 @@ describe('visit onChoice 紀錄（階段3）', () => {
     nextVisitPhase(v); // → ask
     chooseMercy(v, 0);
     expect(onChoice).toHaveBeenCalledWith({
-      scene: 'v-demo', label: null, text: '善', axis: 'mercy', delta: 1, weight: 1,
+      scene: 'v-demo', label: null, text: '善', axis: 'ren', delta: 1, weight: 1,
     });
   });
 });

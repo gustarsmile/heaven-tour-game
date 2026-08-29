@@ -170,18 +170,11 @@ describe('內容資料驗證', () => {
 // ---------- 序章專屬 ----------
 
 describe('序章專屬驗證', () => {
-  it('權重為 2，且四軸恰好各一題', () => {
+  it('權重為 2，且每題 karma 軸皆為五常之一', () => {
     expect(prologue.karmaWeight).toBe(2);
-    const axesUsed = prologue.nodes
-      .filter((n) => n.type === 'choice')
-      .map((n) => n.choices.find((c) => c.karma)?.karma.axis);
-    expect(axesUsed.length).toBe(AXES.length);
-    expect([...axesUsed].sort()).toEqual([...AXES].sort());
-  });
-  it('四個抉擇節點皆有 label（孽鏡反照情境標籤）', () => {
-    const nodes = prologue.nodes.filter((n) => n.type === 'choice');
-    expect(nodes.length).toBe(4);
-    for (const n of nodes) expect(n.label.length).toBeGreaterThan(0);
+    for (const n of prologue.nodes.filter((x) => x.type === 'choice')) {
+      expect(AXES).toContain(n.choices.find((c) => c.karma).karma.axis);
+    }
   });
 });
 

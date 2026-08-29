@@ -1,5 +1,5 @@
 import { WU_THRESHOLD, PROLOGUE_ID } from '../config.js';
-import { karmaVerdict, finalWu } from '../state.js';
+import { karmaSum, finalWu } from '../state.js';
 
 const PHASES = ['mengpo', 'wu', 'mirror', 'ending', 'mission', 'done'];
 
@@ -31,7 +31,7 @@ export function chooseMengpo(finale, index) {
 
 export function endingKey(state) {
   const high = finalWu(state) >= WU_THRESHOLD;
-  const good = karmaVerdict(state) === 'good';
+  const good = karmaSum(state) >= 0;
   if (high) return good ? 'highGood' : 'highBad';
   return good ? 'lowGood' : 'lowBad';
 }

@@ -10,7 +10,7 @@ const scene = {
     {
       id: 'n2', type: 'choice', text: '怎麼辦？',
       choices: [
-        { text: '善舉', karma: { axis: 'honesty', delta: 1 }, next: 'n3' },
+        { text: '善舉', karma: { axis: 'xin', delta: 1 }, next: 'n3' },
         { text: '不理會', next: 'n3' },
       ],
     },
@@ -30,7 +30,7 @@ describe('scene player', () => {
     const p = createPlayer(scene, { onKarma });
     p.advance();
     const next = p.choose(0);
-    expect(onKarma).toHaveBeenCalledWith('honesty', 1, 2);
+    expect(onKarma).toHaveBeenCalledWith('xin', 1, 2);
     expect(next.id).toBe('n3');
   });
   it('無 karma 的選項不呼叫 onKarma', () => {
@@ -69,7 +69,7 @@ describe('onChoice 紀錄（階段3）', () => {
       {
         id: 'c1', type: 'choice', label: '試題', text: '選？',
         choices: [
-          { text: '善行', karma: { axis: 'mercy', delta: 1 }, next: 'fin' },
+          { text: '善行', karma: { axis: 'ren', delta: 1 }, next: 'fin' },
           { text: '無關', next: 'fin' },
         ],
       },
@@ -80,7 +80,7 @@ describe('onChoice 紀錄（階段3）', () => {
     const onChoice = vi.fn();
     createPlayer(scene, { onChoice }).choose(0);
     expect(onChoice).toHaveBeenCalledWith({
-      scene: 'sc', label: '試題', text: '善行', axis: 'mercy', delta: 1, weight: 2,
+      scene: 'sc', label: '試題', text: '善行', axis: 'ren', delta: 1, weight: 2,
     });
   });
   it('無 karma 的選擇不觸發 onChoice；節點無 label 時傳 null', () => {
