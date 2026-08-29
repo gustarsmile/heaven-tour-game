@@ -9,7 +9,7 @@ describe('index.html 頁首', () => {
   });
   it('有 meta description 與 theme-color', () => {
     expect(html).toMatch(/name="description"/);
-    expect(html).toMatch(/name="theme-color" content="#17130f"/);
+    expect(html).toMatch(/name="theme-color" content="#f4ecd9"/);
   });
   it('og 標籤指向 GAME_URL', async () => {
     const { GAME_URL } = await import('../js/config.js');

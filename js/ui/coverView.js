@@ -15,9 +15,8 @@ export function renderCover({ resumable, modes }, handlers, root) {
   box.appendChild(art);
 
   const body = el('div', 'cover-body');
-  body.appendChild(el('div', 'cover-title', '幽冥之旅'));
-  body.appendChild(el('div', 'cover-subtitle', '地 獄 遊 記'));
-  body.appendChild(el('p', 'cover-tagline', '聽供詞・照孽鏡・斷因果・勸亡魂——最後，照照你自己。'));
+  body.appendChild(el('div', 'cover-title', '天堂遊記'));
+  body.appendChild(el('p', 'cover-tagline', '天上有一棵樹，掛著你的名字。'));
 
   if (resumable) {
     const cont = el('button', 'btn btn-next cover-btn', '繼續旅程');
@@ -37,7 +36,7 @@ export function renderCover({ resumable, modes }, handlers, root) {
   lite.addEventListener('click', () => handlers.onStart('lite'));
   body.appendChild(lite);
 
-  body.appendChild(el('p', 'hint cover-hint', '進度自動儲存於此瀏覽器，左上「☰」可直達各殿。'));
+  body.appendChild(el('p', 'hint cover-hint', '進度自動儲存於此瀏覽器，左上「☰」可直達各站。'));
   box.appendChild(body);
   root.appendChild(box);
 }

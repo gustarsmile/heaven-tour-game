@@ -1,16 +1,16 @@
-/* 主題：莊嚴警世 · 廟宇彩繪
-   朱紅 --vermilion、石青 --azure、鎏金 --gold、墨黑 --ink */
+/* 主題：莊嚴清明 · 廟宇彩繪的天部
+   鎏金 --gold、天青 --azure、雲白宣紙 --ink、墨 --paper、朱砂 --vermilion 點綴 */
 :root {
-  color-scheme: dark;
-  --ink: #17130f;
-  --ink-2: #241d16;
-  --vermilion: #9e2b25;
-  --vermilion-dim: #6f1f1b;
-  --gold: #c9a227;
-  --gold-dim: #8a7020;
-  --azure: #2f5d6b;
-  --paper: #efe3c8;
-  --paper-dim: #cbbc9c;
+  color-scheme: light;
+  --ink: #f4ecd9;
+  --ink-2: #fbf6ea;
+  --vermilion: #a8432a;
+  --vermilion-dim: #d29a6c;
+  --gold: #a9832a;
+  --gold-dim: #cdb56e;
+  --azure: #4f8798;
+  --paper: #2b2114;
+  --paper-dim: #6f6046;
 }
 
 * { box-sizing: border-box; }
@@ -19,7 +19,7 @@ body {
   margin: 0;
   min-height: 100dvh;
   background:
-    radial-gradient(ellipse at 50% -10%, #2c231a 0%, var(--ink) 60%);
+    radial-gradient(ellipse at 50% -10%, #fffdf6 0%, var(--ink) 55%, #e6d8b6 100%);
   color: var(--paper);
   font-family: "Noto Serif TC", "PMingLiU", serif;
   line-height: 1.9;
@@ -36,9 +36,9 @@ body {
 .scene-box {
   border: 1px solid var(--gold-dim);
   border-radius: 6px;
-  background: linear-gradient(180deg, var(--ink-2), #1d1710);
+  background: linear-gradient(180deg, var(--ink-2), #f6eed9);
   padding: 20px 18px;
-  box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.06), 0 12px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 4px rgba(169, 131, 42, 0.08), 0 12px 32px rgba(90, 70, 30, 0.18);
 }
 
 /* 框架版場景：主圖 .scene-art ＋ 內容 .scene-body（窄幕上下疊、寬幕左圖右文） */
@@ -93,59 +93,21 @@ body {
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
-.btn:hover, .btn:focus-visible { background: rgba(201, 162, 39, 0.1); border-color: var(--gold); }
+.btn:hover, .btn:focus-visible { background: rgba(169, 131, 42, 0.12); border-color: var(--gold); }
 
 .btn-next {
   text-align: center;
   color: var(--gold);
   border-color: var(--gold);
-  background: linear-gradient(180deg, rgba(158, 43, 37, 0.35), rgba(158, 43, 37, 0.15));
+  background: linear-gradient(180deg, rgba(168, 67, 42, 0.16), rgba(168, 67, 42, 0.06));
 }
 
 .choices { margin-top: 6px; }
 
-/* 供詞 */
-.testimony {
-  border-left: 3px solid var(--vermilion);
-  background: rgba(239, 227, 200, 0.04);
-  padding: 8px 12px;
-  margin-bottom: 14px;
-}
-.testimony-line {
-  display: block;
-  width: 100%;
-  font: inherit;
-  text-align: left;
-  color: var(--paper);
-  background: transparent;
-  border: none;
-  padding: 6px 4px;
-  margin: 0;
-}
-.testimony-line.clickable { cursor: pointer; border-bottom: 1px dashed var(--gold-dim); }
-.testimony-line.clickable:hover { color: var(--gold); }
-.testimony-line.found {
-  color: var(--vermilion);
-  text-decoration: line-through;
-  text-decoration-color: var(--vermilion);
-}
-
 .hint { color: var(--paper-dim); font-size: 0.9rem; margin: 0 0 12px; }
 .feedback { color: var(--gold); font-size: 0.95rem; margin-top: 12px; }
 
-/* 孽鏡三格 */
-.mirror-panels { display: grid; gap: 10px; margin: 12px 0 4px; }
-.mirror-panel {
-  border: 1px solid var(--azure);
-  border-radius: 4px;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(47, 93, 107, 0.35), rgba(23, 19, 15, 0.2) 70%);
-  padding: 12px 14px;
-}
-.mirror-num { color: var(--azure); font-size: 0.8rem; letter-spacing: 0.3em; margin-bottom: 4px; filter: brightness(1.6); }
-.mirror-caption { margin: 0; font-size: 0.95rem; }
-
-/* 斷因果選項 */
+/* 選項列（名稱＋說明；沿用自舊判官殿命名，現為封面模式選擇按鈕使用） */
 .opt-name { display: block; color: var(--gold); margin-bottom: 4px; }
 .opt-desc { display: block; font-size: 0.85rem; color: var(--paper-dim); }
 
@@ -157,11 +119,10 @@ body {
   letter-spacing: 0.4em;
   text-indent: 0.4em;
   margin-bottom: 16px;
-  filter: brightness(1.35);
 }
 .card-row { margin: 6px 0; }
 .card-lesson { color: var(--gold); margin: 16px 0; font-size: 1.05rem; }
-.card-source { display: inline-block; color: var(--azure); filter: brightness(1.7); font-size: 0.85rem; margin-bottom: 8px; }
+.card-source { display: inline-block; color: var(--azure); font-size: 0.85rem; margin-bottom: 8px; }
 
 /* 結算 */
 .wu-score { color: var(--gold); font-size: 1.5rem; margin: 12px 0 4px; }
@@ -171,14 +132,14 @@ body {
 .visit-box .hall-title { letter-spacing: 0.15em; }
 .watch-panels { margin: 12px 0; }
 .watch-panel {
-  border: 1px solid #5a1f1f;
+  border: 1px solid var(--gold-dim);
   border-radius: 6px;
   padding: 12px 14px;
   margin: 10px 0;
-  background: radial-gradient(ellipse at 50% 30%, #331111 0%, #16090a 75%);
-  box-shadow: inset 0 0 24px rgba(160, 30, 20, 0.25);
+  background: radial-gradient(ellipse at 50% 30%, #fffdf6 0%, #f1e6cc 75%);
+  box-shadow: inset 0 0 24px rgba(169, 131, 42, 0.12);
 }
-.watch-caption { margin: 0; color: #d9b8a0; line-height: 1.7; }
+.watch-caption { margin: 0; color: var(--paper); line-height: 1.7; }
 .btn-decline { opacity: 0.85; }
 
 /* 善書冊 */
@@ -193,17 +154,6 @@ body {
 .booklet-hall { color: var(--gold); letter-spacing: 0.2em; margin-bottom: 4px; }
 
 /* 結算關 */
-.mirror-echoes { margin: 12px 0; display: grid; gap: 10px; }
-.mirror-echo {
-  border: 1px solid var(--gold-dim);
-  border-radius: 6px;
-  padding: 10px 12px;
-  background: rgba(47, 93, 107, 0.12);
-}
-.mirror-echo.echo-good { border-color: var(--azure); }
-.mirror-echo.echo-evil { border-color: var(--vermilion); background: rgba(158, 43, 37, 0.12); }
-.echo-label { color: var(--gold); font-size: 0.85rem; letter-spacing: 0.2em; }
-.echo-text { margin: 4px 0 0; }
 .ending-title {
   text-align: center;
   color: var(--gold);
@@ -302,7 +252,7 @@ body {
   height: 40px;
   border-radius: 50%;
   border: 1px solid var(--gold-dim);
-  background: rgba(23, 19, 15, 0.8);
+  background: rgba(255, 253, 246, 0.85);
   color: var(--gold);
   font: inherit;
   font-size: 1rem;
@@ -320,7 +270,7 @@ body {
   height: 40px;
   border-radius: 50%;
   border: 1px solid var(--gold-dim);
-  background: rgba(23, 19, 15, 0.8);
+  background: rgba(255, 253, 246, 0.85);
   color: var(--gold);
   font: inherit;
   font-size: 0.85rem;
@@ -332,7 +282,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 30;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(60, 45, 20, 0.45);
   display: none;
 }
 #nav-overlay.open { display: block; }
@@ -343,9 +293,9 @@ body {
   bottom: 0;
   width: min(320px, 88vw);
   overflow-y: auto;
-  background: linear-gradient(180deg, var(--ink-2), #1d1710);
+  background: linear-gradient(180deg, var(--ink-2), #f6eed9);
   border-right: 1px solid var(--gold-dim);
-  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.6);
+  box-shadow: 8px 0 32px rgba(90, 70, 30, 0.25);
   padding: 16px 14px 24px;
 }
 .menu-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -368,7 +318,6 @@ body {
 }
 .menu-section {
   color: var(--vermilion);
-  filter: brightness(1.35);
   letter-spacing: 0.2em;
   font-size: 0.9rem;
   margin: 14px 0 4px;
@@ -376,7 +325,7 @@ body {
   padding-bottom: 4px;
 }
 .menu-hint { color: var(--paper-dim); font-size: 0.78rem; margin: 4px 0 6px; }
-.menu-hall.current { border-color: var(--gold); background: rgba(201, 162, 39, 0.08); }
+.menu-hall.current { border-color: var(--gold); background: rgba(169, 131, 42, 0.1); }
 .menu-hall-title { display: block; color: var(--gold); font-size: 0.95rem; }
 .menu-hall-desc { display: block; color: var(--paper-dim); font-size: 0.8rem; line-height: 1.5; }
 .menu-action { font-size: 0.95rem; }
@@ -388,9 +337,9 @@ body {
   bottom: 28px;
   transform: translateX(-50%) translateY(8px);
   z-index: 40;
-  background: rgba(23, 19, 15, 0.92);
+  background: rgba(255, 253, 246, 0.95);
   border: 1px solid var(--gold);
-  color: var(--gold);
+  color: var(--paper);
   border-radius: 4px;
   padding: 8px 16px;
   font-size: 0.9rem;
@@ -405,7 +354,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 30;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(60, 45, 20, 0.6);
   overflow-y: auto;
   padding: 24px 16px 48px;
 }
@@ -430,7 +379,6 @@ body {
 }
 .cover-subtitle {
   color: var(--vermilion);
-  filter: brightness(1.4);
   font-size: 1.1rem;
   letter-spacing: 0.6em;
   text-indent: 0.6em;

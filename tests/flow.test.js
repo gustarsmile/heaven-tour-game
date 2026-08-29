@@ -87,6 +87,8 @@ describe('全流程整合（flow manifest）', () => {
     expect(root.textContent).toContain('完整遊歷');
     expect(root.textContent).toContain('精簡速覽');
     expect(root.textContent).not.toContain('繼續旅程');
+    expect(root.textContent).toContain('天堂遊記');
+    expect(root.textContent).toContain('天上有一棵樹');
   });
 
   it('通關後存檔含序章五筆選擇紀錄（label、權重×2、screen 欄位）', async () => {

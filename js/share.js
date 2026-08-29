@@ -100,7 +100,7 @@ export function drawShareCard(ctx, { title, wu, motto }, qrImg, bgImg = null) {
   if (qrImg) ctx.drawImage(qrImg, CARD_W / 2 - 105, 1100, 210, 210);
   ctx.fillStyle = C.paperDim;
   ctx.font = `34px ${FONT}`;
-  ctx.fillText('掃碼同遊幽冥・善書勸世', CARD_W / 2, 1352); // 內框底 1368 之上，解重疊
+  ctx.fillText('掃碼同遊天堂・善書勸世', CARD_W / 2, 1352); // 內框底 1368 之上，解重疊
 }
 
 export function buildShareCard(doc, payload, qrImg, bgImg = null) {

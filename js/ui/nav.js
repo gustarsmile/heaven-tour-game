@@ -70,8 +70,8 @@ export function createNav(doc = document) {
     panel.appendChild(head);
 
     if (menu.entries?.length) {
-      panel.appendChild(el('div', 'menu-section', '直達各殿'));
-      panel.appendChild(el('p', 'menu-hint', '直達會從該殿開頭遊歷，該殿得分重新計算。'));
+      panel.appendChild(el('div', 'menu-section', '直達各站'));
+      panel.appendChild(el('p', 'menu-hint', '直達會從該站開頭遊歷，該站得分重新計算。'));
       const list = el('div', 'menu-halls');
       for (const entry of menu.entries) {
         const btn = el('button', `btn menu-hall${entry.current ? ' current' : ''}`);
@@ -84,7 +84,7 @@ export function createNav(doc = document) {
     }
 
     panel.appendChild(el('div', 'menu-section', '其他'));
-    if (menu.onBooklet) panel.appendChild(menuAction('翻閱善書冊（已存因果卡）', menu.onBooklet));
+    if (menu.onBooklet) panel.appendChild(menuAction('翻閱善書冊（已存天音卡）', menu.onBooklet));
     if (menu.onSave) {
       panel.appendChild(menuAction('儲存進度（存於此瀏覽器）', () => {
         menu.onSave();

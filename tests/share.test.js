@@ -98,7 +98,7 @@ describe('drawShareCard', () => {
     drawShareCard(ctx, payload, null, null);
     const caption = texts(ctx).length ? ctx.calls.filter(([n]) => n === 'fillText').at(-1) : null;
     expect(caption[0]).toBe('fillText');
-    expect(caption[1]).toBe('掃碼同遊幽冥・善書勸世');
+    expect(caption[1]).toBe('掃碼同遊天堂・善書勸世');
     expect(caption[3]).toBeLessThanOrEqual(1360);
   });
 });

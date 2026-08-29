@@ -1,6 +1,6 @@
-// WebAudio 程序化音效：木魚（點擊）、磬（答對）、翻頁（收卡）、環境音（風＋鐵鍊）
+// WebAudio 程序化音效：木魚（點擊）、磬（答對）、翻頁（收卡）、場景環境音（天堂風＋風鈴／地府風＋鐵鍊）
 // 零音檔資產；無 AudioContext（測試環境、老瀏覽器）時全部靜默 no-op。
-const KEY = 'hellTourAudio.v1';
+const KEY = 'heavenTourAudio.v1';
 
 function safeStorage(storage) {
   if (storage !== undefined) return storage;
@@ -13,6 +13,7 @@ export function createAudio({ storage, AC = globalThis.AudioContext } = {}) {
   try { enabled = store?.getItem(KEY) !== 'off'; } catch { /* 忽略 */ }
   let ctx = null;
   let ambient = null;
+  let scene = 'heaven';
 
   function persist() {
     try { store?.setItem(KEY, enabled ? 'on' : 'off'); } catch { /* 忽略 */ }
@@ -41,15 +42,15 @@ export function createAudio({ storage, AC = globalThis.AudioContext } = {}) {
     o.start(t); o.stop(t + 0.12);
   }
 
-  function chime() { // 磬：基音＋泛音長衰減
+  function chime() { // 磬：親子版改為明亮風鈴——C6/E6/G6 快速琶音，衰減縮短去除空靈陰森感
     const c = ensureCtx(); if (!c) return;
     const t = c.currentTime;
-    for (const [freq, peak] of [[1318.5, 0.1], [2637, 0.04]]) {
+    for (const [freq, peak, delay] of [[1046.5, 0.09, 0], [1318.5, 0.07, 0.06], [1568, 0.05, 0.12]]) {
       const o = c.createOscillator(); const g = c.createGain();
       o.type = 'sine'; o.frequency.value = freq;
-      env(g, t, peak, 1.4);
+      env(g, t + delay, peak, 0.9);
       o.connect(g).connect(c.destination);
-      o.start(t); o.stop(t + 1.5);
+      o.start(t + delay); o.stop(t + delay + 1);
     }
   }
 
@@ -79,6 +80,18 @@ export function createAudio({ storage, AC = globalThis.AudioContext } = {}) {
     }
   }
 
+  function windChime() { // 天堂環境點綴：一串輕風鈴（G6-C7-A6）
+    const c = ensureCtx(); if (!c) return;
+    const t = c.currentTime;
+    for (const [freq, peak, delay] of [[1568, 0.03, 0], [2093, 0.02, 0.18], [1760, 0.025, 0.36]]) {
+      const o = c.createOscillator(); const g = c.createGain();
+      o.type = 'sine'; o.frequency.value = freq;
+      env(g, t + delay, peak, 1.2);
+      o.connect(g).connect(c.destination);
+      o.start(t + delay); o.stop(t + delay + 1.3);
+    }
+  }
+
   function startAmbient() {
     const c = ensureCtx(); if (!c || ambient) return;
     // 風：棕噪音循環過低通
@@ -88,11 +101,11 @@ export function createAudio({ storage, AC = globalThis.AudioContext } = {}) {
     let last = 0;
     for (let i = 0; i < len; i++) { last = (last + (Math.random() * 2 - 1) * 0.02) * 0.995; d[i] = last * 3; }
     const src = c.createBufferSource(); src.buffer = buf; src.loop = true;
-    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 320;
-    const g = c.createGain(); g.gain.value = 0.05;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = scene === 'hell' ? 320 : 620; // 天堂風聲較清亮
+    const g = c.createGain(); g.gain.value = scene === 'hell' ? 0.05 : 0.035;
     src.connect(lp).connect(g).connect(c.destination);
     src.start();
-    const timer = setInterval(clank, 12000); // 鐵鍊遠響
+    const timer = setInterval(scene === 'hell' ? clank : windChime, 12000); // 地府鐵鍊遠響／天堂風鈴點綴
     ambient = { src, timer };
   }
 
@@ -110,5 +123,11 @@ export function createAudio({ storage, AC = globalThis.AudioContext } = {}) {
     return enabled;
   }
 
-  return { tick, chime, flip, startAmbient, stopAmbient, toggle, isEnabled: () => enabled };
+  function setScene(next) { // 場景切換：天堂／地府，重建環境音以套用新場景參數
+    if (scene === next) return;
+    scene = next;
+    if (ambient) { stopAmbient(); startAmbient(); }
+  }
+
+  return { tick, chime, flip, startAmbient, stopAmbient, toggle, setScene, isEnabled: () => enabled };
 }
