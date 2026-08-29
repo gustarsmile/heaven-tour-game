@@ -1,4 +1,5 @@
 import { el } from './render.js';
+import { appendCardBody } from './cardView.js';
 
 export function renderBooklet(entries, onBack, root) {
   root.innerHTML = '';
@@ -13,17 +14,7 @@ export function renderBooklet(entries, onBack, root) {
     const item = el('div', e.owned ? 'booklet-card' : 'booklet-card missing');
     item.appendChild(el('div', 'booklet-hall', e.title));
     if (e.owned) {
-      item.appendChild(el('p', 'card-row', e.card.title));
-      item.appendChild(el('p', 'text', e.card.lesson));
-      item.appendChild(el('p', 'card-lesson', `「${e.card.quote}」`));
-      if (e.card.speaker) item.appendChild(el('p', 'hint', `——${e.card.speaker}`));
-      if (e.card.source && e.card.source.chapter) {
-        const a = el('a', 'card-source', `出自《天堂遊記》第${e.card.source.chapter}回`);
-        a.href = e.card.source.url;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        item.appendChild(a);
-      }
+      appendCardBody(item, e.card);
     } else {
       item.appendChild(el('p', 'card-row', '此站天音卡尚未收得。'));
     }

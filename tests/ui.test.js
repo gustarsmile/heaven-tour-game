@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi } from 'vitest';
 import { el, renderNode, hallLabel, renderError } from '../js/ui/render.js';
-import { renderCard } from '../js/ui/cardView.js';
+import { renderCard, appendCardBody } from '../js/ui/cardView.js';
 import { renderBooklet } from '../js/ui/bookletView.js';
 import { renderVisitPhase } from '../js/ui/visitView.js';
 import { renderFinalePhase, renderShareOverlay } from '../js/ui/finaleView.js';
@@ -67,6 +67,15 @@ describe('cardView.js', () => {
     const root = document.createElement('div');
     renderCard({ ...demoCard, source: { chapter: null, url: 'https://x' } }, vi.fn(), root);
     expect(root.querySelector('.card-source')).toBeNull();
+  });
+  it('appendCardBody：僅在 chapter 為真值時渲染出處連結', () => {
+    const withChapter = document.createElement('div');
+    appendCardBody(withChapter, demoCard);
+    expect(withChapter.querySelector('.card-source')).not.toBeNull();
+
+    const withoutChapter = document.createElement('div');
+    appendCardBody(withoutChapter, { ...demoCard, source: { chapter: null, url: 'https://x' } });
+    expect(withoutChapter.querySelector('.card-source')).toBeNull();
   });
 });
 
