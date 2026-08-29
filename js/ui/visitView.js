@@ -1,11 +1,11 @@
-import { el, hallLabel, artImg, sceneFrame } from './render.js';
+import { el, artImg, sceneFrame } from './render.js';
 
 export function renderVisitPhase(visit, handlers, root, message = '') {
   root.innerHTML = '';
   const d = visit.data;
   const frame = sceneFrame('scene-box visit-box', d.art?.scene);
   const box = frame.body; // 內容進右欄（窄幕時在主圖下方）
-  box.appendChild(el('div', 'hall-title', `${hallLabel(d.hall)}・${d.king}`));
+  box.appendChild(el('div', 'hall-title', d.title));
 
   if (visit.phase === 'watch') {
     box.appendChild(el('div', 'speaker', d.watch.title));
@@ -17,15 +17,17 @@ export function renderVisitPhase(visit, handlers, root, message = '') {
       panels.appendChild(pn);
     });
     box.appendChild(panels);
-    appendNext(box, d.quiz || d.mercy ? '濟公有問 ▸' : '繼續前行 ▸', handlers.onNextPhase);
-  } else if (visit.phase === 'ask' && d.quiz) {
-    box.appendChild(el('div', 'speaker', '濟公考問'));
+    const label = d.quiz ? '濟公有問 ▸' : d.mercy ? '且慢 ▸' : d.branch ? '繼續 ▸' : '繼續前行 ▸';
+    appendNext(box, label, handlers.onNextPhase);
+  } else if (visit.phase === 'quiz') {
+    box.appendChild(el('div', 'speaker', d.quiz.speaker ?? '濟公考問'));
     box.appendChild(el('p', 'text', d.quiz.question));
     if (visit.quizPoints !== null) {
       box.appendChild(el('p', 'feedback', d.quiz.reveal));
-      appendNext(box, '繼續前行 ▸', handlers.onNextPhase);
+      appendNext(box, d.mercy ? '繼續 ▸' : '繼續前行 ▸', handlers.onNextPhase);
     } else {
       const list = el('div', 'choices');
+      list.dataset.kind = 'quiz';
       d.quiz.options.forEach((o, i) => {
         const btn = el('button', 'btn btn-choice', o);
         btn.addEventListener('click', () => handlers.onQuiz(i));
@@ -34,13 +36,15 @@ export function renderVisitPhase(visit, handlers, root, message = '') {
       box.appendChild(list);
       if (message) box.appendChild(el('p', 'feedback', message));
     }
-  } else if (visit.phase === 'ask' && d.mercy) {
+  } else if (visit.phase === 'mercy') {
+    if (d.mercy.speaker) box.appendChild(el('div', 'speaker', d.mercy.speaker));
     box.appendChild(el('p', 'text', d.mercy.prompt));
     if (visit.mercyReply !== null) {
       box.appendChild(el('p', 'text', visit.mercyReply));
       appendNext(box, '繼續前行 ▸', handlers.onNextPhase);
     } else {
       const list = el('div', 'choices');
+      list.dataset.kind = 'mercy';
       d.mercy.choices.forEach((o, i) => {
         const btn = el('button', 'btn btn-choice', o.text);
         btn.addEventListener('click', () => handlers.onMercy(i));
@@ -64,7 +68,7 @@ export function renderVisitPhase(visit, handlers, root, message = '') {
     // branchTaken === true 時支線場景由流程層執行（flow.js），結束後直接切到 closing
   } else if (visit.phase === 'closing') {
     box.appendChild(el('p', 'text', d.closing));
-    appendNext(box, '收下因果卡 ▸', handlers.onFinish);
+    appendNext(box, '收下天音卡 ▸', handlers.onFinish);
   }
   root.appendChild(frame.box);
 }

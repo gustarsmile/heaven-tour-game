@@ -1,7 +1,8 @@
 export function visitPhases(data) {
   return [
     'watch',
-    ...(data.quiz || data.mercy ? ['ask'] : []),
+    ...(data.quiz ? ['quiz'] : []),
+    ...(data.mercy ? ['mercy'] : []),
     ...(data.branch ? ['branch'] : []),
     'closing',
     'done',
@@ -40,7 +41,7 @@ export function prevVisitPhase(visit) {
 }
 
 export function answerQuiz(visit, index) {
-  if (visit.phase !== 'ask' || !visit.data.quiz) throw new Error('目前不在考題階段');
+  if (visit.phase !== 'quiz' || !visit.data.quiz) throw new Error('目前不在考題階段');
   if (visit.quizPoints !== null) return { correct: true, points: visit.quizPoints };
   const correct = index === visit.data.quiz.answer;
   if (correct) {
@@ -52,7 +53,7 @@ export function answerQuiz(visit, index) {
 }
 
 export function chooseMercy(visit, index) {
-  if (visit.phase !== 'ask' || !visit.data.mercy) throw new Error('目前不在慈悲抉擇階段');
+  if (visit.phase !== 'mercy' || !visit.data.mercy) throw new Error('目前不在抉擇階段');
   if (visit.mercyReply !== null) return { reply: visit.mercyReply };
   const opt = visit.data.mercy.choices[index];
   if (!opt) throw new Error(`選項不存在：${index}`);

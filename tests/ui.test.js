@@ -108,11 +108,11 @@ describe('小修整（階段3 Task1）', () => {
 });
 
 const base = {
-  id: 'v-demo', hall: 2, type: 'visit', king: '楚江王',
+  id: 'v-demo', type: 'visit', title: '南天門・把關',
   intro: [{ speaker: '旁白', text: 'x' }],
   watch: { title: '某獄', panels: [{ caption: '其一' }] },
   closing: '走吧。',
-  karmaCard: { sin: 's', result: 'r', lesson: 'l', source: { chapter: null, url: 'https://x' } },
+  card: { title: 't', lesson: 'l', quote: 'q', speaker: 's', source: { chapter: 1, url: 'https://x' } },
 };
 const quizVisit = { ...base, quiz: { question: 'Q', options: ['甲', '乙', '丙'], answer: 1, hint: 'H', reveal: 'R' } };
 const mercyVisit = {
@@ -120,12 +120,13 @@ const mercyVisit = {
   mercy: {
     prompt: 'P',
     choices: [
-      { text: '善', karma: { axis: 'ren', delta: 1 }, reply: 'r1' },
+      { text: '善', karma: { axis: 'li', delta: 1 }, reply: 'r1' },
       { text: '中', reply: 'r2' },
-      { text: '惡', karma: { axis: 'ren', delta: -1 }, reply: 'r3' },
+      { text: '惡', karma: { axis: 'li', delta: -1 }, reply: 'r3' },
     ],
   },
 };
+const bothVisit = { ...quizVisit, mercy: mercyVisit.mercy };
 const branchVisit = {
   ...base,
   branch: {
@@ -139,7 +140,7 @@ describe('visitView', () => {
     const root = document.createElement('div');
     const v = createVisit(quizVisit);
     renderVisitPhase(v, { onNextPhase: vi.fn() }, root);
-    expect(root.textContent).toContain('第二殿');
+    expect(root.textContent).toContain('南天門・把關');
     expect(root.textContent).toContain('某獄');
     expect(root.querySelectorAll('.watch-panel').length).toBe(1);
   });
@@ -151,6 +152,7 @@ describe('visitView', () => {
     renderVisitPhase(v, { onQuiz }, root);
     const btns = root.querySelectorAll('.btn-choice');
     expect(btns.length).toBe(3);
+    expect(root.querySelector('.choices').dataset.kind).toBe('quiz');
     btns[2].click();
     expect(onQuiz).toHaveBeenCalledWith(2);
     v.quizPoints = 5;
@@ -159,6 +161,18 @@ describe('visitView', () => {
     expect(root.textContent).toContain('R');
     root.querySelector('.btn-next').click();
     expect(onNextPhase).toHaveBeenCalled();
+  });
+  it('quiz 答對後：有 mercy 的站顯示「繼續」，否則「繼續前行」；mercy 容器 data-kind=mercy', () => {
+    const root = document.createElement('div');
+    const v = createVisit(bothVisit);
+    nextVisitPhase(v);
+    v.quizPoints = 5;
+    renderVisitPhase(v, { onNextPhase: vi.fn() }, root);
+    expect(root.querySelector('.btn-next').textContent).toBe('繼續 ▸');
+    nextVisitPhase(v); // mercy
+    renderVisitPhase(v, { onMercy: vi.fn() }, root);
+    expect(root.querySelector('.choices').dataset.kind).toBe('mercy');
+    expect(root.querySelectorAll('.btn-choice').length).toBe(3);
   });
   it('mercy 已選後顯示 reply 與繼續鈕', () => {
     const root = document.createElement('div');
@@ -185,13 +199,14 @@ describe('visitView', () => {
     expect(root.textContent).toContain('D');
     expect(root.querySelector('.btn-next')).not.toBeNull();
   });
-  it('closing 階段顯示結語與收下因果卡鈕', () => {
+  it('closing 階段顯示結語與收下天音卡鈕', () => {
     const root = document.createElement('div');
     const v = createVisit(quizVisit);
     v.phase = 'closing';
     const onFinish = vi.fn();
     renderVisitPhase(v, { onFinish }, root);
     expect(root.textContent).toContain('走吧。');
+    expect(root.querySelector('.btn-next').textContent).toContain('天音卡');
     root.querySelector('.btn-next').click();
     expect(onFinish).toHaveBeenCalled();
   });

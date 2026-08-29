@@ -70,12 +70,11 @@ function validateReactionChoices(choices) {
 }
 
 function validateVisit(v) {
-  expect(v.king.length).toBeGreaterThan(0);
+  expect(v.title.length).toBeGreaterThan(0);
   expect(v.intro.length).toBeGreaterThanOrEqual(1);
   expect(v.watch.title.length).toBeGreaterThan(0);
   expect(v.watch.panels.length).toBeGreaterThanOrEqual(1);
   expect(v.watch.panels.length).toBeLessThanOrEqual(3);
-  expect(v.quiz && v.mercy).toBeFalsy(); // 考題與慈悲抉擇至多擇一
   if (v.quiz) {
     expect(v.quiz.options.length).toBe(3);
     expect(v.quiz.answer).toBeGreaterThanOrEqual(0);
@@ -94,7 +93,7 @@ function validateVisit(v) {
   expect(v.closing.length).toBeGreaterThan(0);
   validateCard(v.card);
   expectArt(v.art.scene);
-  expectArt(v.art.watch);
+  if (v.art.watch) expectArt(v.art.watch);
 }
 
 function validateTree(t) {

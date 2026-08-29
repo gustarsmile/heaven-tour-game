@@ -3,10 +3,11 @@
     { "id": "prologue", "type": "scene", "src": "prologue.json" },
     { "id": "interlude", "type": "scene", "src": "interlude.json" },
     { "id": "sapling", "type": "tree", "src": "sapling.json" },
+    { "id": "gate", "type": "visit", "src": "gate.json" },
     { "id": "donghua", "type": "tree", "src": "donghua.json" },
     { "id": "hall10", "type": "finale", "src": "hall10.json" }
   ],
   "modes": {
-    "lite": ["prologue", "interlude", "sapling", "donghua", "hall10"]
+    "lite": ["prologue", "interlude", "sapling", "gate", "donghua", "hall10"]
   }
 }

@@ -4,11 +4,11 @@ import {
 } from '../js/engine/visit.js';
 
 const base = {
-  id: 'v-demo', hall: 2, type: 'visit', king: '楚江王',
+  id: 'v-demo', type: 'visit', title: '南天門・把關',
   intro: [{ speaker: '旁白', text: 'x' }],
-  watch: { title: '某獄', panels: [{ caption: '其一' }] },
+  watch: { title: '門前', panels: [{ caption: '其一' }] },
   closing: '走吧。',
-  karmaCard: { sin: 's', result: 'r', lesson: 'l', source: { chapter: null, url: 'https://x' } },
+  card: { title: 't', lesson: 'l', quote: 'q', speaker: 's', source: { chapter: 1, url: 'https://x' } },
 };
 const quizVisit = { ...base, quiz: { question: 'Q', options: ['甲', '乙', '丙'], answer: 1, hint: 'H', reveal: 'R' } };
 const mercyVisit = {
@@ -16,12 +16,13 @@ const mercyVisit = {
   mercy: {
     prompt: 'P',
     choices: [
-      { text: '善', karma: { axis: 'ren', delta: 1 }, reply: 'r1' },
+      { text: '善', karma: { axis: 'li', delta: 1 }, reply: 'r1' },
       { text: '中', reply: 'r2' },
-      { text: '惡', karma: { axis: 'ren', delta: -1 }, reply: 'r3' },
+      { text: '惡', karma: { axis: 'li', delta: -1 }, reply: 'r3' },
     ],
   },
 };
+const bothVisit = { ...quizVisit, mercy: mercyVisit.mercy };
 const branchVisit = {
   ...base,
   branch: {
@@ -31,18 +32,26 @@ const branchVisit = {
 };
 
 describe('visitPhases', () => {
-  it('考題殿：watch→ask→closing→done', () => {
-    expect(visitPhases(quizVisit)).toEqual(['watch', 'ask', 'closing', 'done']);
-  });
-  it('慈悲抉擇殿相同；支線殿無 ask 有 branch', () => {
-    expect(visitPhases(mercyVisit)).toEqual(['watch', 'ask', 'closing', 'done']);
+  it('考題站：watch→quiz→closing→done；抉擇站：watch→mercy→…；兩者並存：quiz 先 mercy 後', () => {
+    expect(visitPhases(quizVisit)).toEqual(['watch', 'quiz', 'closing', 'done']);
+    expect(visitPhases(mercyVisit)).toEqual(['watch', 'mercy', 'closing', 'done']);
+    expect(visitPhases(bothVisit)).toEqual(['watch', 'quiz', 'mercy', 'closing', 'done']);
     expect(visitPhases(branchVisit)).toEqual(['watch', 'branch', 'closing', 'done']);
   });
   it('nextVisitPhase 依序前進、到底停住', () => {
-    const v = createVisit(quizVisit);
+    const v = createVisit(bothVisit);
     expect(v.phase).toBe('watch');
-    ['ask', 'closing', 'done'].forEach((p) => expect(nextVisitPhase(v)).toBe(p));
+    ['quiz', 'mercy', 'closing', 'done'].forEach((p) => expect(nextVisitPhase(v)).toBe(p));
     expect(nextVisitPhase(v)).toBe('done');
+  });
+  it('quiz 階段不可 chooseMercy；mercy 階段不可 answerQuiz', () => {
+    const v = createVisit(bothVisit);
+    nextVisitPhase(v); // quiz
+    expect(() => chooseMercy(v, 0)).toThrow();
+    expect(answerQuiz(v, 1).correct).toBe(true);
+    nextVisitPhase(v); // mercy
+    expect(() => answerQuiz(v, 1)).toThrow();
+    expect(chooseMercy(v, 0)).toEqual({ reply: 'r1' });
   });
 });
 
@@ -74,7 +83,7 @@ describe('chooseMercy', () => {
     const v = createVisit(mercyVisit, { onKarma });
     nextVisitPhase(v);
     expect(chooseMercy(v, 0)).toEqual({ reply: 'r1' });
-    expect(onKarma).toHaveBeenCalledWith('ren', 1, 1);
+    expect(onKarma).toHaveBeenCalledWith('li', 1, 1);
     expect(chooseMercy(v, 2)).toEqual({ reply: 'r1' });
     expect(onKarma).toHaveBeenCalledTimes(1);
   });
@@ -104,23 +113,23 @@ describe('takeBranch 與 visitScore', () => {
 describe('visit onChoice 紀錄（階段3）', () => {
   it('mercy 帶 karma 選項觸發 onChoice', () => {
     const data = {
-      id: 'v-demo', hall: 4,
+      id: 'v-demo', title: 't',
       watch: { title: 't', panels: [{ caption: 'c' }] },
       mercy: {
         prompt: 'P',
         choices: [
-          { text: '善', karma: { axis: 'ren', delta: 1 }, reply: 'r1' },
-          { text: '惡', karma: { axis: 'ren', delta: -1 }, reply: 'r3' },
+          { text: '善', karma: { axis: 'li', delta: 1 }, reply: 'r1' },
+          { text: '惡', karma: { axis: 'li', delta: -1 }, reply: 'r3' },
         ],
       },
       closing: 'x',
     };
     const onChoice = vi.fn();
     const v = createVisit(data, { onChoice });
-    nextVisitPhase(v); // → ask
+    nextVisitPhase(v); // → mercy
     chooseMercy(v, 0);
     expect(onChoice).toHaveBeenCalledWith({
-      scene: 'v-demo', label: null, text: '善', axis: 'ren', delta: 1, weight: 1,
+      scene: 'v-demo', label: null, text: '善', axis: 'li', delta: 1, weight: 1,
     });
   });
 });
