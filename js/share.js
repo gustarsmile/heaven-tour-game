@@ -3,15 +3,15 @@ import { GAME_TITLE } from './config.js';
 export const CARD_W = 1080;
 export const CARD_H = 1440;
 
-// 與 css/style.css :root 同一套廟宇彩繪色票
+// 與 css/style.css :root 同一套天堂配色（亮底深字）
 const C = {
-  ink: '#17130f',
-  ink2: '#241d16',
-  vermilion: '#9e2b25',
-  gold: '#c9a227',
-  goldDim: '#8a7020',
-  paper: '#efe3c8',
-  paperDim: '#cbbc9c',
+  ink: '#f4ecd9',
+  ink2: '#fbf6ea',
+  vermilion: '#a8432a',
+  gold: '#a9832a',
+  goldDim: '#cdb56e',
+  paper: '#2b2114',
+  paperDim: '#6f6046',
 };
 const FONT = '"Noto Serif TC", "PMingLiU", serif';
 
@@ -54,7 +54,7 @@ export function drawShareCard(ctx, { title, wu, motto }, qrImg, bgImg = null) {
   ctx.fillRect(0, 0, CARD_W, CARD_H);
   if (bgImg) {
     drawCoverImage(ctx, bgImg);
-    ctx.fillStyle = 'rgba(23, 19, 15, 0.45)'; // 壓暗保文字可讀
+    ctx.fillStyle = 'rgba(255, 253, 246, 0.6)'; // 提亮保文字可讀（底圖為明亮天堂圖）
     ctx.fillRect(0, 0, CARD_W, CARD_H);
   } else {
     ctx.fillStyle = C.ink2;

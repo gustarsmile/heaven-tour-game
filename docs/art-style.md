@@ -21,3 +21,4 @@
 - 樹況五級（tree-1～tree-5）：同一構圖置中、樹上掛空白木牌、背景雲海金光；`tree-4` 以現有入庫圖為基準，其餘四級用它當參考圖只改樹況（枯萎／稀疏／平常／結果纍纍）。
 - 產製：draw 技能（`python C:/Users/yoyoc/.claude/skills/draw/draw.py "<前綴><描述>" --edit <參考圖> --size 1536x1024 --quality low`）→ `art-src/<name>.png` → `npm run opt-art`（webp q60；同時由 `art-src/cover.png` 產 `assets/og.png`）。
 - 美術總體積守門 6MB（`tests/art.test.js`）。
+- 分享卡底圖 share-bg：直式 2:3，上緣瑤池宮闕、下緣金色蓮台、中央淡雲留白供文字；卡面文字用淺色配色（js/share.js 的 C 色票與 CSS :root 同步）。
