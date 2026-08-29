@@ -1,10 +1,12 @@
 import { WU_THRESHOLD, PROLOGUE_ID } from '../config.js';
-import { karmaSum, finalWu } from '../state.js';
+import { finalWu } from '../state.js';
+import { treeVerdict } from './tree.js';
 
-const PHASES = ['mengpo', 'wu', 'mirror', 'ending', 'mission', 'done'];
+// 瑤池結算（階段 1 簡易版）：悟性公布 → 看樹 → 評語 → 稱號卡
+const PHASES = ['wu', 'tree', 'ending', 'done'];
 
-export function createFinale(data, state) {
-  return { data, state, phases: [...PHASES], phase: 'mengpo', drank: null, mengpoReply: null };
+export function createFinale(data, state, treeData) {
+  return { data, state, treeData, phases: [...PHASES], phase: 'wu' };
 }
 
 export function nextFinalePhase(finale) {
@@ -19,19 +21,10 @@ export function prevFinalePhase(finale) {
   return finale.phase;
 }
 
-export function chooseMengpo(finale, index) {
-  if (finale.phase !== 'mengpo') throw new Error('目前不在孟婆亭階段');
-  if (finale.drank !== null) return { drank: finale.drank, reply: finale.mengpoReply };
-  const opt = finale.data.mengpo.choices[index];
-  if (!opt) throw new Error(`選項不存在：${index}`);
-  finale.drank = opt.drank;
-  finale.mengpoReply = opt.reply;
-  return { drank: opt.drank, reply: opt.reply };
-}
-
+// 四象限（設計 §3.5）：悟性 ≥ 70 為高 × 樹況善／傷
 export function endingKey(state) {
   const high = finalWu(state) >= WU_THRESHOLD;
-  const good = karmaSum(state) >= 0;
+  const good = treeVerdict(state) === 'good';
   if (high) return good ? 'highGood' : 'highBad';
   return good ? 'lowGood' : 'lowBad';
 }
@@ -40,18 +33,11 @@ export function prologueReplay(state) {
   return state.choices.filter((c) => c.screen === PROLOGUE_ID);
 }
 
-export function journeyTally(state) {
-  const rest = state.choices.filter((c) => c.screen !== PROLOGUE_ID);
-  return {
-    good: rest.filter((c) => c.delta > 0).length,
-    evil: rest.filter((c) => c.delta < 0).length,
-  };
-}
-
 export function worstPrologueChoice(state) {
   return prologueReplay(state).find((c) => c.delta < 0) ?? null;
 }
 
+// 「知而未行」「再世重修」結語引用序章具體選擇
 export function endingQuote(ending, state) {
   if (!ending.quote) return null;
   const worst = worstPrologueChoice(state);

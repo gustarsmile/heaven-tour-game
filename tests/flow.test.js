@@ -12,7 +12,7 @@ for (const [path, mod] of Object.entries(modules)) {
   FILES[path.replace('../js/', 'js/')] = mod.default;
 }
 const flowData = FILES['js/data/flow.json'];
-const hall10 = FILES['js/data/hall10.json'];
+const yaochi = FILES['js/data/yaochi.json'];
 
 const loadJSON = async (p) => {
   if (!(p in FILES)) throw new Error(`missing ${p}`);
@@ -122,8 +122,10 @@ describe('全流程整合（flow manifest）', () => {
     expect(s.wuMax).toBe(max);
     const wu = max > 0 ? Math.round((raw / max) * 100) : 0;
     expect(finalWu(s)).toBe(wu);
+    expect(finalWu(s)).toBe(100);
     expect(root.textContent).toContain(`悟性值 ${wu}`);
-    expect(root.textContent).toContain(hall10.endings[endingKey(s)].title);
+    expect(root.textContent).toContain(yaochi.endings[endingKey(s)].title);
+    expect(root.textContent).toContain('道果圓熟・蓮台九品');
     // 重新開始 → 回封面 → 選完整遊歷 → 序章第一句
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
     expect(root.textContent).toContain('完整遊歷');
@@ -150,8 +152,10 @@ describe('全流程整合（flow manifest）', () => {
     const { raw } = expectedRaw(flowData.screens, { acceptBranch: true, evil: true });
     expect(rawWu(s)).toBe(raw);
     const wu = finalWu(s);
+    expect(finalWu(s)).toBeLessThan(70);
     expect(root.textContent).toContain(`悟性值 ${wu}`);
-    expect(root.textContent).toContain(hall10.endings[endingKey(s)].title);
+    expect(root.textContent).toContain(yaochi.endings[endingKey(s)].title);
+    expect(root.textContent).toContain('種子未萌・再世重修');
     const pro = s.choices.filter((c) => c.screen === 'prologue');
     expect(pro.length).toBe(5);
     for (const c of pro) expect(c.delta).toBe(-1);

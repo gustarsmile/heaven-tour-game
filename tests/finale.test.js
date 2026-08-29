@@ -1,105 +1,76 @@
 import { describe, it, expect } from 'vitest';
 import { WU_THRESHOLD, KARMA_PENALTY, PROLOGUE_ID } from '../js/config.js';
-import { createState, creditWu, recordChoice, finalWu } from '../js/state.js';
+import { createState, creditWu, recordChoice, setRepent, finalWu } from '../js/state.js';
 import {
-  createFinale, nextFinalePhase, prevFinalePhase, chooseMengpo, endingKey,
-  prologueReplay, journeyTally, worstPrologueChoice, endingQuote,
+  createFinale, nextFinalePhase, prevFinalePhase, endingKey,
+  prologueReplay, worstPrologueChoice, endingQuote,
 } from '../js/engine/finale.js';
-
-const mengpoData = {
-  mengpo: {
-    choices: [
-      { text: '不喝', drank: false, reply: '好志氣。' },
-      { text: '喝下', drank: true, reply: '忘了故事，別忘了心。' },
-    ],
-  },
-};
+import treeData from '../js/data/tree.json';
 
 // wuMax=100 讓 rawWu 直接等於折算分，惡選另扣 KARMA_PENALTY×權重
 function stateWith(wu, karmaDelta) {
   const s = createState();
   s.wuMax = 100;
   creditWu(s, 'x', wu);
-  if (karmaDelta) {
-    recordChoice(s, { screen: 'hall4', scene: 'hall4', text: 'x', axis: 'ren', delta: karmaDelta });
-  }
+  if (karmaDelta) recordChoice(s, { screen: 'gate', scene: 'gate', text: 'x', axis: 'li', delta: karmaDelta });
   return s;
 }
 
-describe('四象限結局判定', () => {
+describe('四象限結局判定（悟性 × 樹況）', () => {
   it('門檻為 70', () => expect(WU_THRESHOLD).toBe(70));
-  it('悟性 70／心善 → highGood；69 → lowGood', () => {
+  it('悟性 70／樹善 → highGood；69 → lowGood', () => {
     expect(endingKey(stateWith(70, 0))).toBe('highGood');
     expect(endingKey(stateWith(69, 0))).toBe('lowGood');
   });
-  it('心性總和負 → Bad 象限，且惡選扣悟性', () => {
-    // 一筆惡選（權重1）扣 KARMA_PENALTY：70+扣分 → 仍 ≥70 → highBad
+  it('五軸總和負 → Bad 象限，且惡選扣悟性', () => {
     expect(finalWu(stateWith(70 + KARMA_PENALTY, -1))).toBe(70);
     expect(endingKey(stateWith(70 + KARMA_PENALTY, -1))).toBe('highBad');
     expect(endingKey(stateWith(69, -1))).toBe('lowBad');
-    expect(endingKey(stateWith(100, 0))).toBe('highGood');
+  });
+  it('三官殿補過可把樹況從傷翻回善（不退還悟性扣分）', () => {
+    const s = stateWith(100, -1);
+    expect(endingKey(s)).toBe('highBad');
+    setRepent(s, 'li', 'sanguan');
+    expect(endingKey(s)).toBe('highGood');
+    expect(finalWu(s)).toBe(100 - KARMA_PENALTY);
   });
 });
 
-describe('孟婆亭', () => {
-  it('依選項設定 drank 與 reply；重複選擇回傳既有值', () => {
-    const f = createFinale(mengpoData, createState());
-    expect(f.phase).toBe('mengpo');
-    expect(chooseMengpo(f, 1)).toEqual({ drank: true, reply: '忘了故事，別忘了心。' });
-    expect(chooseMengpo(f, 0)).toEqual({ drank: true, reply: '忘了故事，別忘了心。' });
-  });
-  it('非 mengpo 階段擲錯；不存在選項擲錯', () => {
-    const f = createFinale(mengpoData, createState());
-    expect(() => chooseMengpo(f, 9)).toThrow();
-    nextFinalePhase(f);
+describe('結算階段機', () => {
+  it('wu→tree→ending→done 到底停住；prev 可回退且首階段停住；treeData 掛在 finale 上', () => {
+    const f = createFinale({}, createState(), treeData);
     expect(f.phase).toBe('wu');
-    expect(() => chooseMengpo(f, 0)).toThrow();
-  });
-  it('階段機走到 done 停住；prev 可回退且首階段停住', () => {
-    const f = createFinale(mengpoData, createState());
-    for (const expected of ['wu', 'mirror', 'ending', 'mission', 'done', 'done']) {
-      expect(nextFinalePhase(f)).toBe(expected);
-    }
-    expect(prevFinalePhase(f)).toBe('mission');
-    const g = createFinale(mengpoData, createState());
-    expect(prevFinalePhase(g)).toBe('mengpo');
+    expect(f.treeData).toBe(treeData);
+    for (const expected of ['tree', 'ending', 'done', 'done']) expect(nextFinalePhase(f)).toBe(expected);
+    expect(prevFinalePhase(f)).toBe('ending');
+    const g = createFinale({}, createState(), treeData);
+    expect(prevFinalePhase(g)).toBe('wu');
   });
 });
 
-describe('孽鏡反照資料', () => {
+describe('序章回放與結語引用', () => {
   function journeyState() {
     const s = createState();
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '早市多找的錢', text: '退還', axis: 'xin', delta: 1, weight: 2 });
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '群組裡的謠言', text: '轉傳', axis: 'li', delta: -1, weight: 2 });
-    recordChoice(s, { screen: 'hall4', scene: 'hall4', text: '別過頭去', axis: 'ren', delta: -1 });
-    recordChoice(s, { screen: 'hall5', scene: 'hall5-lookout', text: '深深一揖', axis: 'ren', delta: 1 });
+    recordChoice(s, { screen: PROLOGUE_ID, scene: PROLOGUE_ID, label: '清晨・隔壁的信箱', text: '敲敲門', axis: 'ren', delta: 1, weight: 2 });
+    recordChoice(s, { screen: PROLOGUE_ID, scene: PROLOGUE_ID, label: '晚上・上週的承諾', text: '我臨時有事', axis: 'xin', delta: -1, weight: 2 });
+    recordChoice(s, { screen: 'gate', scene: 'gate', text: '見怪', axis: 'li', delta: -1 });
     return s;
   }
-  it('prologueReplay 只取序章、依序；journeyTally 只計旅途', () => {
-    const s = journeyState();
-    expect(prologueReplay(s).map((c) => c.axis)).toEqual(['xin', 'li']);
-    expect(journeyTally(s)).toEqual({ good: 1, evil: 1 });
-  });
-  it('prologueReplay 以 PROLOGUE_ID（screen 欄位）過濾', () => {
-    const s = createState();
-    recordChoice(s, { screen: PROLOGUE_ID, scene: PROLOGUE_ID, label: '早市', text: 'a', axis: 'xin', delta: 1 });
-    recordChoice(s, { screen: 'hall3', scene: 'hall3-gossip', text: 'b', axis: 'li', delta: -1 });
-    expect(prologueReplay(s).length).toBe(1);
+  it('prologueReplay 只取序章、依序', () => {
+    expect(prologueReplay(journeyState()).map((c) => c.axis)).toEqual(['ren', 'xin']);
   });
   it('worstPrologueChoice 取序章第一筆惡選；全善回 null', () => {
-    const s = journeyState();
-    expect(worstPrologueChoice(s).text).toBe('轉傳');
+    expect(worstPrologueChoice(journeyState()).text).toBe('我臨時有事');
     const good = createState();
-    recordChoice(good, { screen: 'prologue', scene: 'prologue', text: 'x', axis: 'ren', delta: 1, weight: 2 });
+    recordChoice(good, { screen: PROLOGUE_ID, scene: PROLOGUE_ID, text: 'x', axis: 'ren', delta: 1, weight: 2 });
     expect(worstPrologueChoice(good)).toBeNull();
   });
   it('endingQuote：代入 label/text；無惡選用 fallback；無 quote 回 null', () => {
     const ending = { quote: '{label}——你選的是「{text}」。', quoteFallback: '陽間那日你走得端正。' };
-    const s = journeyState();
-    expect(endingQuote(ending, s)).toBe('群組裡的謠言——你選的是「轉傳」。');
+    expect(endingQuote(ending, journeyState())).toBe('晚上・上週的承諾——你選的是「我臨時有事」。');
     const good = createState();
-    recordChoice(good, { screen: 'prologue', scene: 'prologue', text: 'x', axis: 'ren', delta: 1, weight: 2 });
+    recordChoice(good, { screen: PROLOGUE_ID, scene: PROLOGUE_ID, text: 'x', axis: 'ren', delta: 1, weight: 2 });
     expect(endingQuote(ending, good)).toBe('陽間那日你走得端正。');
-    expect(endingQuote({ title: 't' }, s)).toBeNull();
+    expect(endingQuote({ title: 't' }, journeyState())).toBeNull();
   });
 });

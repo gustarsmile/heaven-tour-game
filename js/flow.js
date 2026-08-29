@@ -6,8 +6,8 @@ import { loadBooklet, addCard } from './booklet.js';
 import { createPlayer } from './engine/scene.js';
 import { createVisit, nextVisitPhase, prevVisitPhase, answerQuiz, chooseMercy, takeBranch, visitScore } from './engine/visit.js';
 import { createTreeScreen, nextTreePhase, prevTreePhase, answerCase, caseIndex, treeScore, treeMax } from './engine/treeScreen.js';
-import { createFinale, nextFinalePhase, prevFinalePhase, chooseMengpo, endingKey } from './engine/finale.js';
-import { renderNode, el, hallLabel } from './ui/render.js';
+import { createFinale, nextFinalePhase, prevFinalePhase, endingKey } from './engine/finale.js';
+import { renderNode, el } from './ui/render.js';
 import { renderCard } from './ui/cardView.js';
 import { renderVisitPhase } from './ui/visitView.js';
 import { renderTreePhase } from './ui/treeView.js';
@@ -206,7 +206,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
   }
 
   function runFinale(data) {
-    const finale = createFinale(data, state);
+    const finale = createFinale(data, state, treeData);
     const step = () => {
       setLocalBack(finale.phase !== finale.phases[0]
         ? () => { prevFinalePhase(finale); step(); }
@@ -215,7 +215,6 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     };
     const handlers = {
       onNextPhase: () => { nextFinalePhase(finale); step(); },
-      onMengpo: (i) => { chooseMengpo(finale, i); step(); },
       onShare: async () => {
         const ending = data.endings[endingKey(state)];
         const [qr, bg] = await Promise.all([
@@ -236,10 +235,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
 
   function menuTitleOf(scr) {
     const d = resources[scr.id];
-    if (d?.menuTitle) return d.menuTitle;
-    if (d?.title) return d.title;
-    if (d?.hall) return `${hallLabel(d.hall)}・${d.king}`;
-    return scr.id === PROLOGUE_ID ? '序章・陽間一日' : '過場';
+    return d?.menuTitle ?? d?.title ?? (scr.id === PROLOGUE_ID ? '序章・陽間一日' : '過場');
   }
 
   function menuConfig() {

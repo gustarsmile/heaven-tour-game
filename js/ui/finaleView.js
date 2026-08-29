@@ -1,6 +1,7 @@
-import { el, hallLabel, artImg, sceneFrame } from './render.js';
-import { endingKey, prologueReplay, journeyTally, endingQuote } from '../engine/finale.js';
+import { el, artImg, sceneFrame } from './render.js';
+import { endingKey, endingQuote } from '../engine/finale.js';
 import { finalWu, rawWu, karmaPenalty } from '../state.js';
+import { readTree, treeLevel } from '../engine/tree.js';
 import { GAME_TITLE, GAME_URL } from '../config.js';
 
 function appendNext(box, label, onClick) {
@@ -17,79 +18,60 @@ function appendLines(box, lines) {
   }
 }
 
+function appendVerdicts(box, state, treeData) {
+  const list = el('div', 'tree-verdicts');
+  for (const r of readTree(state, treeData)) {
+    const item = el('div', `tree-verdict verdict-${r.state}`);
+    item.appendChild(el('div', 'verdict-part', `${r.part}・${r.label}`));
+    item.appendChild(el('p', 'verdict-text', r.text));
+    list.appendChild(item);
+  }
+  box.appendChild(list);
+}
+
 export function renderFinalePhase(finale, handlers, root) {
   root.innerHTML = '';
   const d = finale.data;
   const s = finale.state;
-  const frame = sceneFrame('scene-box finale-box', d.art?.scene);
-  const box = frame.body; // 內容進右欄（窄幕時在主圖下方）
-  box.appendChild(el('div', 'hall-title', `${hallLabel(d.hall)}・${d.king}`));
+  const level = treeLevel(s, finale.treeData.levels);
+  // 看樹與結尾相位以「你的樹」為主圖，其餘相位為瑤池殿景
+  const showTree = finale.phase === 'tree' || finale.phase === 'done';
+  const frame = sceneFrame('scene-box finale-box', showTree ? level.art : d.art?.scene);
+  const box = frame.body;
+  box.appendChild(el('div', 'hall-title', d.title));
 
-  if (finale.phase === 'mengpo') {
-    appendLines(box, d.mengpo.lines);
-    if (finale.drank === null) {
-      box.appendChild(el('p', 'text', d.mengpo.prompt));
-      const list = el('div', 'choices');
-      d.mengpo.choices.forEach((c, i) => {
-        const btn = el('button', 'btn btn-choice', c.text);
-        btn.addEventListener('click', () => handlers.onMengpo(i));
-        list.appendChild(btn);
-      });
-      box.appendChild(list);
-    } else {
-      box.appendChild(el('p', 'text', finale.mengpoReply));
-      appendNext(box, '入殿覆命 ▸', handlers.onNextPhase);
-    }
-  } else if (finale.phase === 'wu') {
+  if (finale.phase === 'wu') {
     appendLines(box, d.wuReveal.lines);
     box.appendChild(el('p', 'wu-score', `悟性值 ${finalWu(s)} ／ 100`));
     const pen = karmaPenalty(s);
     const detail = `答題修行 ${rawWu(s)}／${s.wuMax} 分${pen > 0 ? `，心性有虧扣 ${pen} 分` : '，心性無虧'}`;
     box.appendChild(el('p', 'hint wu-detail', detail));
     box.appendChild(el('p', 'hint', d.wuReveal.note));
-    appendNext(box, '領判 ▸', handlers.onNextPhase);
-  } else if (finale.phase === 'mirror') {
-    appendLines(box, d.mirror.lines);
-    const echoes = prologueReplay(s);
-    if (echoes.length === 0) {
-      box.appendChild(el('p', 'text', '鏡光流轉，映出的影像卻模糊不清——那一日的記憶，已隨霧氣散去。'));
-    } else {
-      const list = el('div', 'mirror-echoes');
-      for (const c of echoes) {
-        const tone = c.delta > 0 ? 'echo-good' : c.delta < 0 ? 'echo-evil' : 'echo-plain';
-        const item = el('div', `mirror-echo ${tone}`);
-        item.appendChild(el('div', 'echo-label', c.label ?? ''));
-        item.appendChild(el('p', 'echo-text', `你的選擇——「${c.text}」`));
-        list.appendChild(item);
-      }
-      box.appendChild(list);
-    }
-    const t = journeyTally(s);
-    box.appendChild(el('p', 'text',
-      d.mirror.journey.replaceAll('{good}', String(t.good)).replaceAll('{evil}', String(t.evil))));
-    appendNext(box, '聽判 ▸', handlers.onNextPhase);
+    appendNext(box, '看樹 ▸', handlers.onNextPhase);
+  } else if (finale.phase === 'tree') {
+    appendLines(box, d.tree.lines);
+    box.appendChild(el('div', 'tree-level', `樹況・${level.label}`));
+    box.appendChild(el('p', 'text', level.line));
+    appendVerdicts(box, s, finale.treeData);
+    appendNext(box, '聽評 ▸', handlers.onNextPhase);
   } else if (finale.phase === 'ending') {
     const e = d.endings[endingKey(s)];
-    box.appendChild(el('div', 'card-title', '判 詞'));
+    box.appendChild(el('div', 'card-title', '評 語'));
     box.appendChild(el('p', 'ending-title', e.title));
-    const artFile = d.art?.endings?.[endingKey(s)];
-    if (artFile) box.appendChild(artImg(artFile, 'art-ending'));
     appendLines(box, e.comment);
     const quote = endingQuote(e, s);
     if (quote) box.appendChild(el('p', 'ending-quote', quote));
     appendNext(box, '領受 ▸', handlers.onNextPhase);
-  } else if (finale.phase === 'mission') {
-    appendLines(box, finale.drank ? d.mission.drank : d.mission.kept);
-    appendNext(box, '還陽 ▸', handlers.onNextPhase);
   } else if (finale.phase === 'done') {
     frame.box.classList.add('finale-end');
     const e = d.endings[endingKey(s)];
-    box.appendChild(el('div', 'card-title', '此 行 判 詞'));
+    box.appendChild(el('div', 'card-title', '此 行 評 語'));
     box.appendChild(el('p', 'ending-title', e.title));
     box.appendChild(el('p', 'wu-score', `悟性值 ${finalWu(s)} ／ 100`));
+    box.appendChild(el('div', 'tree-level', `樹況・${level.label}`));
     box.appendChild(el('p', 'card-lesson', `「${e.motto}」`));
     if (d.source) {
-      const a = el('a', 'card-source', `結算取材：《地獄遊記》第${d.source.chapters}回`);
+      const a = el('a', 'card-source', `結算取材：${d.source.label}`);
       a.href = d.source.url;
       a.target = '_blank';
       a.rel = 'noopener';

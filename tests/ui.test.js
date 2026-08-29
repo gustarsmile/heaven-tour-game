@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi } from 'vitest';
-import { el, renderNode, hallLabel, renderError } from '../js/ui/render.js';
+import { el, renderNode, renderError } from '../js/ui/render.js';
 import { renderCard, appendCardBody } from '../js/ui/cardView.js';
 import { renderBooklet } from '../js/ui/bookletView.js';
 import { renderVisitPhase } from '../js/ui/visitView.js';
@@ -8,7 +8,8 @@ import { renderFinalePhase, renderShareOverlay } from '../js/ui/finaleView.js';
 import { createVisit, nextVisitPhase } from '../js/engine/visit.js';
 import { createFinale } from '../js/engine/finale.js';
 import { createState, recordChoice, creditWu } from '../js/state.js';
-import hall10 from '../js/data/hall10.json';
+import yaochi from '../js/data/yaochi.json';
+import treeData from '../js/data/tree.json';
 
 describe('render.js', () => {
   it('el 建立元素', () => {
@@ -76,15 +77,6 @@ describe('cardView.js', () => {
     const withoutChapter = document.createElement('div');
     appendCardBody(withoutChapter, { ...demoCard, source: { chapter: null, url: 'https://x' } });
     expect(withoutChapter.querySelector('.card-source')).toBeNull();
-  });
-});
-
-describe('小修整（階段2 Task1）', () => {
-  it('hallLabel 支援一到十殿，超出以數字 fallback', () => {
-    expect(hallLabel(1)).toBe('第一殿');
-    expect(hallLabel(7)).toBe('第七殿');
-    expect(hallLabel(10)).toBe('第十殿');
-    expect(hallLabel(11)).toBe('第11殿');
   });
 });
 
@@ -241,66 +233,48 @@ describe('bookletView', () => {
 
 describe('finaleView', () => {
   function readyState() {
-    // 折算 88 分 − 一筆序章惡選（權重2）扣 8 分 → 悟性 80、心性 −2 → highBad
+    // 折算 88 分 − 一筆序章惡選（權重2）扣 8 分 → 悟性 80；樹總和 −2 → 傷 → highBad、稀疏
     const s = createState();
     s.wuMax = 100;
     creditWu(s, 'x', 88);
-    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '早市多找的錢', text: '收進口袋——是他自己找錯的', axis: 'xin', delta: -1, weight: 2 });
+    recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '晚上・上週的承諾', text: '「我臨時有事。」——其實只是不想去', axis: 'xin', delta: -1, weight: 2 });
     return s;
   }
-  it('mengpo 未選時渲染兩選項；選後顯示 reply 與繼續鈕', () => {
+  it('wu 階段：悟性值與扣分明細', () => {
     const root = document.createElement('div');
-    const f = createFinale(hall10, readyState());
-    renderFinalePhase(f, { onMengpo: vi.fn() }, root);
-    expect(root.querySelectorAll('.btn-choice').length).toBe(2);
-    f.drank = false;
-    f.mengpoReply = hall10.mengpo.choices[0].reply;
-    renderFinalePhase(f, { onNextPhase: vi.fn() }, root);
-    expect(root.textContent).toContain(hall10.mengpo.choices[0].reply);
-    expect(root.querySelector('.btn-next')).not.toBeNull();
-  });
-  it('wu 階段顯示悟性值；mirror 階段回放序章選擇與旅途統計', () => {
-    const root = document.createElement('div');
-    const f = createFinale(hall10, readyState());
-    f.phase = 'wu';
+    const f = createFinale(yaochi, readyState(), treeData);
     renderFinalePhase(f, { onNextPhase: vi.fn() }, root);
     expect(root.textContent).toContain('悟性值 80');
-    f.phase = 'mirror';
-    renderFinalePhase(f, { onNextPhase: vi.fn() }, root);
-    expect(root.querySelectorAll('.mirror-echo').length).toBe(1);
-    expect(root.textContent).toContain('早市多找的錢');
-    expect(root.textContent).toContain('收進口袋');
-    expect(root.textContent).toContain('0'); // journey tally 代入
+    expect(root.textContent).toContain('心性有虧扣 8 分');
+    expect(root.querySelector('.scene-art img').getAttribute('src')).toBe('assets/art/yaochi-scene.webp');
   });
-  it('孽鏡反照 choices 為空時顯示 fallback 文字而非空清單', () => {
+  it('tree 階段：主圖為樹況圖、等級標籤、五段評語', () => {
     const root = document.createElement('div');
-    const finale = createFinale(hall10, createState()); // choices 為空的全新 state
-    const handlers = { onNextPhase: vi.fn() };
-    finale.phase = 'mirror';
-    renderFinalePhase(finale, handlers, root);
-    expect(root.textContent).toContain('模糊');
-    expect(root.querySelectorAll('.mirror-echo').length).toBe(0);
+    const f = createFinale(yaochi, readyState(), treeData);
+    f.phase = 'tree';
+    renderFinalePhase(f, { onNextPhase: vi.fn() }, root);
+    expect(root.querySelector('.scene-art img').getAttribute('src')).toBe('assets/art/tree-2.webp');
+    expect(root.querySelector('.tree-level').textContent).toContain('稀疏');
+    expect(root.querySelectorAll('.tree-verdict').length).toBe(5);
   });
   it('ending 階段：highBad 顯示稱號與序章選擇引用', () => {
     const root = document.createElement('div');
-    const f = createFinale(hall10, readyState()); // wu80、karma -2 → highBad
+    const f = createFinale(yaochi, readyState(), treeData);
     f.phase = 'ending';
     renderFinalePhase(f, { onNextPhase: vi.fn() }, root);
-    expect(root.textContent).toContain('滿腹經綸·知易行難');
-    expect(root.querySelector('.ending-quote').textContent).toContain('收進口袋');
+    expect(root.textContent).toContain('滿樹青果・知而未行');
+    expect(root.querySelector('.ending-quote').textContent).toContain('我臨時有事');
   });
-  it('mission 依 drank 顯示兩版；done 為 finale-end 且含三鈕', () => {
+  it('done 為 finale-end，含稱號、悟性、樹況、出處與三鈕', () => {
     const root = document.createElement('div');
-    const f = createFinale(hall10, readyState());
-    f.phase = 'mission';
-    f.drank = true;
-    renderFinalePhase(f, { onNextPhase: vi.fn() }, root);
-    expect(root.textContent).toContain(hall10.mission.drank[0].text);
+    const f = createFinale(yaochi, readyState(), treeData);
     f.phase = 'done';
     const onShare = vi.fn(); const onBooklet = vi.fn(); const onRestart = vi.fn();
     renderFinalePhase(f, { onShare, onBooklet, onRestart }, root);
     expect(root.querySelector('.finale-end')).not.toBeNull();
     expect(root.textContent).toContain('悟性值 80');
+    expect(root.textContent).toContain('稀疏');
+    expect(root.querySelector('.card-source').textContent).toContain('第三六回');
     const btns = [...root.querySelectorAll('button')];
     btns.find((b) => b.textContent.includes('分享卡')).click();
     btns.find((b) => b.textContent.includes('善書冊')).click();

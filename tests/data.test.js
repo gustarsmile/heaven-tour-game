@@ -121,22 +121,11 @@ function validateTree(t) {
 }
 
 function validateFinale(f) {
-  expect(f.king.length).toBeGreaterThan(0);
+  expect(f.title.length).toBeGreaterThan(0);
   expect(f.intro.length).toBeGreaterThanOrEqual(1);
-  expect(f.mengpo.lines.length).toBeGreaterThanOrEqual(1);
-  expect(f.mengpo.prompt.length).toBeGreaterThan(0);
-  expect(f.mengpo.choices.length).toBe(2);
-  expect(f.mengpo.choices[0].drank).toBe(false); // autoplay 慣例：首選為「不喝」（善向）
-  for (const c of f.mengpo.choices) {
-    expect(typeof c.drank).toBe('boolean');
-    expect(c.text.length).toBeGreaterThan(0);
-    expect(c.reply.length).toBeGreaterThan(0);
-  }
   expect(f.wuReveal.lines.length).toBeGreaterThanOrEqual(1);
   expect(f.wuReveal.note.length).toBeGreaterThan(0);
-  expect(f.mirror.lines.length).toBeGreaterThanOrEqual(1);
-  expect(f.mirror.journey).toContain('{good}');
-  expect(f.mirror.journey).toContain('{evil}');
+  expect(f.tree.lines.length).toBeGreaterThanOrEqual(1);
   const keys = ['highBad', 'highGood', 'lowBad', 'lowGood'];
   expect(Object.keys(f.endings).sort()).toEqual(keys);
   for (const k of keys) {
@@ -150,11 +139,9 @@ function validateFinale(f) {
     expect(f.endings[k].quote).toContain('{text}'); // 引用序章具體選擇（設計 §3.5）
     expect(f.endings[k].quoteFallback.length).toBeGreaterThan(0);
   }
-  expect(f.mission.kept.length).toBeGreaterThanOrEqual(1);
-  expect(f.mission.drank.length).toBeGreaterThanOrEqual(1);
+  expect(f.source.label.length).toBeGreaterThan(0);
   expect(f.source.url).toMatch(/^https?:\/\//);
   expectArt(f.art.scene);
-  for (const k of keys) expectArt(f.art.endings[k]);
 }
 
 // ---------- flow.json 守門 ----------
@@ -218,18 +205,18 @@ describe('序章專屬驗證', () => {
   });
 });
 
-// ---------- 十殿專屬驗證 ----------
+// ---------- 瑤池結算專屬 ----------
 
-describe('十殿專屬驗證', () => {
-  it('四結局稱號與設計文件一致', () => {
-    const e = FILES['hall10.json'].endings;
-    expect(e.highGood.title).toBe('大覺大悟·代天宣化');
-    expect(e.highBad.title).toBe('滿腹經綸·知易行難');
-    expect(e.lowGood.title).toBe('不識一字·菩薩心腸');
-    expect(e.lowBad.title).toBe('執迷不悟·輪迴重修');
+describe('瑤池結算專屬驗證', () => {
+  it('四結局稱號與設計文件 §3.5 一致', () => {
+    const e = FILES['yaochi.json'].endings;
+    expect(e.highGood.title).toBe('道果圓熟・蓮台九品');
+    expect(e.highBad.title).toBe('滿樹青果・知而未行');
+    expect(e.lowGood.title).toBe('不識經文・根深葉茂');
+    expect(e.lowBad.title).toBe('種子未萌・再世重修');
   });
-  it('hall10 結算出處連結與起始回一致（第55回=/57.htm）', () => {
-    expect(FILES['hall10.json'].source.url).toBe('https://www.taolibrary.com/category/category48/c48002b/57.htm');
+  it('結算出處為第三六回（/38.htm）', () => {
+    expect(FILES['yaochi.json'].source.url).toBe('https://www.taolibrary.com/category/category48/c48001b/38.htm');
   });
 });
 

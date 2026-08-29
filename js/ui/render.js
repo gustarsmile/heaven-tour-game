@@ -53,12 +53,6 @@ export function renderNode(node, handlers, root, opts = {}) {
   root.appendChild(box);
 }
 
-export const NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-
-export function hallLabel(hall) {
-  return `第${NUM[hall - 1] ?? hall}殿`;
-}
-
 export function renderError(err, onRetry, root) {
   root.innerHTML = '';
   const box = el('div', 'scene-box');
