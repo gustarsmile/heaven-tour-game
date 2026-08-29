@@ -1,14 +1,16 @@
 import { el } from './render.js';
 
-export function renderKarmaCard(card, onNext, root) {
+// 天音卡：說法白話 → 原文金句（逐字）→ 出處（設計 §3.7）
+export function renderCard(card, onNext, root) {
   root.innerHTML = '';
   const box = el('div', 'scene-box karma-card');
-  box.appendChild(el('div', 'card-title', '因 果 卡'));
-  box.appendChild(el('p', 'card-row', `罪業：${card.sin}`));
-  box.appendChild(el('p', 'card-row', `果報：${card.result}`));
-  box.appendChild(el('p', 'card-lesson', `「${card.lesson}」`));
+  box.appendChild(el('div', 'card-title', '天 音 卡'));
+  box.appendChild(el('p', 'card-row', card.title));
+  box.appendChild(el('p', 'text', card.lesson));
+  box.appendChild(el('p', 'card-lesson', `「${card.quote}」`));
+  if (card.speaker) box.appendChild(el('p', 'hint', `——${card.speaker}`));
   if (card.source && card.source.chapter) {
-    const a = el('a', 'card-source', `出自《地獄遊記》第${card.source.chapter}回`);
+    const a = el('a', 'card-source', `出自《天堂遊記》第${card.source.chapter}回`);
     a.href = card.source.url;
     a.target = '_blank';
     a.rel = 'noopener';

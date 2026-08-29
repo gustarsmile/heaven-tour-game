@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi } from 'vitest';
 import { el, renderNode, hallLabel, renderError } from '../js/ui/render.js';
-import { renderKarmaCard } from '../js/ui/cardView.js';
+import { renderCard } from '../js/ui/cardView.js';
 import { renderBooklet } from '../js/ui/bookletView.js';
 import { renderVisitPhase } from '../js/ui/visitView.js';
 import { renderFinalePhase, renderShareOverlay } from '../js/ui/finaleView.js';
@@ -39,21 +39,34 @@ describe('render.js', () => {
   });
 });
 
-const demoCard = { sin: '斗秤不公', result: '秤鉤獄', lesson: '公平交易', source: { chapter: 8, url: 'https://x' } };
+const demoCard = {
+  title: '花樹映心',
+  lesson: '人人天上一棵樹，牌上寫著自己的名字。',
+  quote: '你在世擁有愉快心境，則天上靈命也將心花怒放。',
+  speaker: '東華帝君',
+  source: { chapter: 13, url: 'https://www.taolibrary.com/category/category48/c48001b/15.htm' },
+};
 
 describe('cardView.js', () => {
-  it('因果卡：chapter 為 null 時不顯示出處列', () => {
+  it('天音卡：標題、白話、原文金句、說者、出處連結，按鈕觸發 onNext', () => {
     const root = document.createElement('div');
-    const card = { ...demoCard, source: { chapter: null, url: 'https://example.com' } };
-    renderKarmaCard(card, vi.fn(), root);
-    expect(root.querySelector('.card-source')).toBeNull();
-    expect(root.textContent).toContain(card.lesson);
+    const onNext = vi.fn();
+    renderCard(demoCard, onNext, root);
+    expect(root.textContent).toContain('天 音 卡');
+    expect(root.textContent).toContain('花樹映心');
+    expect(root.textContent).toContain(demoCard.lesson);
+    expect(root.textContent).toContain(demoCard.quote);
+    expect(root.textContent).toContain('東華帝君');
+    const a = root.querySelector('.card-source');
+    expect(a.textContent).toContain('《天堂遊記》第13回');
+    expect(a.getAttribute('href')).toBe(demoCard.source.url);
+    root.querySelector('.btn-next').click();
+    expect(onNext).toHaveBeenCalled();
   });
-  it('因果卡：有 chapter 時顯示出處連結', () => {
+  it('chapter 為 null 時不顯示出處列', () => {
     const root = document.createElement('div');
-    const card = { ...demoCard, source: { chapter: 12, url: 'https://example.com' } };
-    renderKarmaCard(card, vi.fn(), root);
-    expect(root.querySelector('.card-source').textContent).toContain('第12回');
+    renderCard({ ...demoCard, source: { chapter: null, url: 'https://x' } }, vi.fn(), root);
+    expect(root.querySelector('.card-source')).toBeNull();
   });
 });
 
@@ -177,14 +190,15 @@ describe('visitView', () => {
 
 describe('bookletView', () => {
   const entries = [
-    { id: 'hall1', hall: 1, owned: true, card: { sin: '斗秤不公', result: '秤鉤獄', lesson: '公平交易', source: { chapter: 8, url: 'https://x' } } },
-    { id: 'hall2', hall: 2, owned: false, card: { sin: 's2', result: 'r2', lesson: 'l2', source: { chapter: null, url: 'https://x' } } },
+    { id: 'gate', title: '南天門', owned: true, card: { title: '悟空', lesson: '心要放空。', quote: '空之其情慾及妄念，自可通過此關。', speaker: '齊天大聖', source: { chapter: 1, url: 'https://x' } } },
+    { id: 'donghua', title: '東華宮', owned: false, card: { title: '花樹映心', lesson: 'l2', quote: 'q2', speaker: 's2', source: { chapter: 13, url: 'https://x' } } },
   ];
   it('顯示收集進度、已收卡全文、未收卡占位與補完提示', () => {
     const root = document.createElement('div');
     renderBooklet(entries, vi.fn(), root);
     expect(root.textContent).toContain('1／2');
-    expect(root.textContent).toContain('斗秤不公');
+    expect(root.textContent).toContain('悟空');
+    expect(root.textContent).toContain('南天門');
     expect(root.textContent).toContain('尚未收得');
     expect(root.textContent).toContain('重遊');
     expect(root.querySelectorAll('.booklet-card').length).toBe(2);

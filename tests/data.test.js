@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync } from 'node:fs';
 import { AXES } from '../js/state.js';
+import { SOURCE_BASE, SOURCE_CHAPTERS } from '../js/config.js';
 import prologue from '../js/data/prologue.json';
 
 const modules = import.meta.glob('../js/data/*.json', { eager: true });
@@ -45,14 +46,13 @@ function validateScene(scene) {
   expect(scene.nodes.some((n) => n.type === 'end')).toBe(true);
 }
 
-const SOURCE_BASE = 'https://www.taolibrary.com/category/category48/c48002b';
-function validateKarmaCard(card) {
-  for (const key of ['sin', 'result', 'lesson', 'source']) expect(card[key]).toBeTruthy();
-  expect(Number.isInteger(card.source.chapter)).toBe(true); // 不再允許 null
+function validateCard(card) {
+  for (const key of ['title', 'lesson', 'quote', 'speaker', 'source']) expect(card[key]).toBeTruthy();
+  expect(Number.isInteger(card.source.chapter)).toBe(true);
   expect(card.source.chapter).toBeGreaterThanOrEqual(1);
-  expect(card.source.chapter).toBeLessThanOrEqual(65);
-  // 網址與回數強一致（網頁編號＝回數＋2）
-  expect(card.source.url).toBe(`${SOURCE_BASE}/${card.source.chapter + 2}.htm`);
+  expect(card.source.chapter).toBeLessThanOrEqual(SOURCE_CHAPTERS);
+  // 網址與回數強一致（網頁編號＝回數＋2，兩位數補零：第 1 回 → 03.htm）
+  expect(card.source.url).toBe(`${SOURCE_BASE}/${String(card.source.chapter + 2).padStart(2, '0')}.htm`);
 }
 
 function validateReactionChoices(choices) {
@@ -92,7 +92,7 @@ function validateVisit(v) {
     validateScene(v.branch.scene);
   }
   expect(v.closing.length).toBeGreaterThan(0);
-  validateKarmaCard(v.karmaCard);
+  validateCard(v.card);
   expectArt(v.art.scene);
   expectArt(v.art.watch);
 }

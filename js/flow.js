@@ -7,7 +7,7 @@ import { createPlayer } from './engine/scene.js';
 import { createVisit, nextVisitPhase, prevVisitPhase, answerQuiz, chooseMercy, takeBranch, visitScore } from './engine/visit.js';
 import { createFinale, nextFinalePhase, prevFinalePhase, chooseMengpo, endingKey } from './engine/finale.js';
 import { renderNode, el, hallLabel } from './ui/render.js';
-import { renderKarmaCard } from './ui/cardView.js';
+import { renderCard } from './ui/cardView.js';
 import { renderVisitPhase } from './ui/visitView.js';
 import { renderFinalePhase, renderShareOverlay } from './ui/finaleView.js';
 import { renderBooklet } from './ui/bookletView.js';
@@ -156,11 +156,11 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
   function bookletEntries() {
     const owned = loadBooklet(storage);
     return flow.screens
-      .filter((scr) => resources[scr.id] && resources[scr.id].karmaCard)
+      .filter((scr) => resources[scr.id] && resources[scr.id].card)
       .map((scr) => ({
         id: scr.id,
-        hall: resources[scr.id].hall,
-        card: resources[scr.id].karmaCard,
+        title: resources[scr.id].menuTitle ?? resources[scr.id].title ?? scr.id,
+        card: resources[scr.id].card,
         owned: owned.includes(scr.id),
       }));
   }
@@ -221,7 +221,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
         .map((scr) => ({
           id: scr.id,
           title: menuTitleOf(scr),
-          desc: resources[scr.id].tagline ?? resources[scr.id].karmaCard?.sin ?? '',
+          desc: resources[scr.id].tagline ?? '',
           current: scr.id === currentScreenId,
         })),
       onJump: goTo,
@@ -254,7 +254,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
         runVisit(data, () => {
           audio.flip();
           setLocalBack(null);
-          renderKarmaCard(data.karmaCard, collectCard, root);
+          renderCard(data.card, collectCard, root);
         }));
     } else if (scr.type === 'finale') {
       runScene(linesToScene(data.intro, data.art?.scene), () => runFinale(data));
