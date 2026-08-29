@@ -69,37 +69,6 @@ function validateReactionChoices(choices) {
   expect(deltas.at(-1)).toBeLessThanOrEqual(0); // 最末選項最惡慣例
 }
 
-function validateFullCase(c) {
-  expect(c.king.length).toBeGreaterThan(0);
-  expect(AXES).toContain(c.axis);
-  expect(c.intro.length).toBeGreaterThanOrEqual(1);
-  const lies = c.testimony.filter((s) => s.lie);
-  expect(lies.length).toBeGreaterThanOrEqual(1);
-  expect(lies.length).toBeLessThanOrEqual(2);
-  expect(c.mirror.length).toBe(3);
-  expect(c.mirrorIntro.length).toBeGreaterThan(0);
-  expect(c.judgeLine.length).toBeGreaterThan(0);
-  expect(c.judgement.answer).toBeGreaterThanOrEqual(0);
-  expect(c.judgement.answer).toBeLessThan(c.judgement.options.length);
-  for (const o of c.judgement.options) {
-    expect(o.name.length).toBeGreaterThan(0);
-    expect(o.desc.length).toBeGreaterThan(0);
-  }
-  const scores = c.persuasion.options.map((o) => o.score);
-  expect([...scores].sort((a, b) => b - a)).toEqual([10, 5, 0]);
-  expect(scores[0]).toBe(10); // autoplay 慣例：最佳句在第 0 位
-  expect(scores.at(-1)).toBe(0); // autoplay 慣例：末選項最惡（0 分）
-  for (const o of c.persuasion.options) expect(o.reaction.length).toBeGreaterThan(0);
-  if (c.react) validateReactionChoices(c.react.choices);
-  if (c.postScene) validateScene(c.postScene);
-  expect(c.closing.length).toBeGreaterThan(0);
-  validateKarmaCard(c.karmaCard);
-  expectArt(c.art.scene);
-  expectArt(c.art.soul);
-  expect(c.art.mirror.length).toBe(3);
-  c.art.mirror.forEach(expectArt);
-}
-
 function validateVisit(v) {
   expect(v.king.length).toBeGreaterThan(0);
   expect(v.intro.length).toBeGreaterThanOrEqual(1);
@@ -174,21 +143,13 @@ describe('flow.json 驗證', () => {
     expect(flow.screens[0].id).toBe('prologue');
     expect(flow.screens.at(-1).type).toBe('finale');
     for (const s of flow.screens) {
-      expect(['scene', 'trial', 'visit', 'finale']).toContain(s.type);
+      expect(['scene', 'visit', 'finale']).toContain(s.type);
       expect(FILES[s.src]).toBeDefined();
       if (s.type === 'scene') expectArt(FILES[s.src].art);
     }
   });
-  it('殿的順序遞增且 type 與資料一致', () => {
-    const halls = flow.screens
-      .filter((s) => s.id.startsWith('hall'))
-      .map((s) => ({ scr: s, data: FILES[s.src] }));
-    let prev = 0;
-    for (const { scr, data } of halls) {
-      expect(data.hall).toBeGreaterThan(prev);
-      prev = data.hall;
-      expect({ trial: 'full', visit: 'visit', finale: 'finale' }[scr.type]).toBe(data.type);
-    }
+  it('每個畫面資料都有 tagline（遊歷選單一句簡介）', () => {
+    for (const s of flow.screens) expect(typeof FILES[s.src].tagline).toBe('string');
   });
 });
 
@@ -198,8 +159,6 @@ describe('內容資料驗證', () => {
   for (const scr of flow.screens) {
     if (scr.type === 'scene') {
       it(`${scr.src}：場景結構正確`, () => validateScene(FILES[scr.src]));
-    } else if (scr.type === 'trial') {
-      it(`${scr.src}：完整判案案例結構正確`, () => validateFullCase(FILES[scr.src]));
     } else if (scr.type === 'visit') {
       it(`${scr.src}：見聞殿結構正確`, () => validateVisit(FILES[scr.src]));
     } else if (scr.type === 'finale') {
@@ -223,31 +182,6 @@ describe('序章專屬驗證', () => {
     const nodes = prologue.nodes.filter((n) => n.type === 'choice');
     expect(nodes.length).toBe(4);
     for (const n of nodes) expect(n.label.length).toBeGreaterThan(0);
-  });
-});
-
-// ---------- 五殿專屬 ----------
-
-describe('五殿專屬驗證', () => {
-  it('hall5 有望鄉臺 postScene，且含 filial 抉擇', () => {
-    const hall5 = FILES['hall5.json'];
-    expect(hall5.postScene).toBeDefined();
-    const choiceNode = hall5.postScene.nodes.find((n) => n.type === 'choice');
-    expect(choiceNode.choices.some((c) => c.karma?.axis === 'filial')).toBe(true);
-  });
-});
-
-// ---------- 六殿專屬 ----------
-
-describe('六殿專屬驗證', () => {
-  it('hall6 為支線型：有 branch、rewardWu 為 10、無考題與慈悲抉擇', () => {
-    const hall6 = FILES['hall6.json'];
-    expect(hall6.branch.rewardWu).toBe(10);
-    expect(hall6.quiz).toBeUndefined();
-    expect(hall6.mercy).toBeUndefined();
-  });
-  it('hall6 結尾含安心專線 1925', () => {
-    expect(FILES['hall6.json'].closing).toContain('1925');
   });
 });
 

@@ -33,14 +33,12 @@ function resourceOf(screenId) {
   return scr?.src ? FILES[`js/data/${scr.src}`] : null;
 }
 
-// 由資料推導完美通關的期望原始分與滿分：判案殿 30、考題殿 5、支線 rewardWu
-// evil 模式：判案殿勸化選最末（0 分），故判案殿每殿 20（spot 10 + judge 10）
-function expectedRaw(screens, { acceptBranch, evil = false }) {
+// 由資料推導完美通關的期望原始分與滿分：考題殿 5、支線 rewardWu
+function expectedRaw(screens, { acceptBranch } = {}) {
   let raw = 0, max = 0;
   for (const scr of screens) {
     const data = resourceOf(scr.id);
     if (!data) continue;
-    if (scr.type === 'trial') { max += 30; raw += evil ? 20 : 30; }
     if (scr.type === 'visit' && data.quiz) { max += 5; raw += 5; }
     if (scr.type === 'visit' && data.branch) {
       max += data.branch.rewardWu;
@@ -61,22 +59,13 @@ function autoplay(root, storage, { acceptBranch = true, evil = false } = {}) {
       (acceptBranch ? accept : root.querySelector('.btn-decline')).click();
       continue;
     }
-    const spotLines = root.querySelectorAll('.testimony-line.clickable');
-    if (spotLines.length) {
-      const idx = data.testimony
-        .map((s, j) => (s.lie ? j : -1)).filter((j) => j >= 0)
-        .find((j) => !spotLines[j].classList.contains('found'));
-      spotLines[idx].click();
-      continue;
-    }
     const next = root.querySelector('.btn-next');
     if (next) { next.click(); continue; } // 封面「完整遊歷」亦為 btn-next，自動走完整版
 
     const choices = root.querySelectorAll('.btn-choice');
     if (choices.length) {
       let idx = 0;
-      if (root.querySelector('.opt-name')) idx = data.judgement.answer;
-      else if (root.querySelector('.visit-box') && data.quiz) idx = data.quiz.answer;
+      if (root.querySelector('.visit-box') && data.quiz) idx = data.quiz.answer;
       else if (evil) idx = choices.length - 1; // 道德選擇全選最惡（末選項慣例）
       choices[idx].click();
       continue;
@@ -120,9 +109,10 @@ describe('全流程整合（flow manifest）', () => {
     const s = load(storage);
     expect(rawWu(s)).toBe(raw);
     expect(s.wuMax).toBe(max);
-    expect(finalWu(s)).toBe(100); // 全對全善 → 滿分
-    expect(root.textContent).toContain('悟性值 100');
-    expect(root.textContent).toContain('大覺大悟·代天宣化'); // highGood
+    const wu = max > 0 ? Math.round((raw / max) * 100) : 0;
+    expect(finalWu(s)).toBe(wu);
+    expect(root.textContent).toContain(`悟性值 ${wu}`);
+    expect(root.textContent).toContain(hall10.endings[endingKey(s)].title);
     // 重新開始 → 回封面 → 選完整遊歷 → 序章第一句
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
     expect(root.textContent).toContain('完整遊歷');
@@ -136,7 +126,7 @@ describe('全流程整合（flow manifest）', () => {
     await startGame({ root, loadJSON, storage });
     autoplay(root, storage, { acceptBranch: false });
     const { raw, max } = expectedRaw(flowData.screens, { acceptBranch: false });
-    const wu = Math.round((raw / max) * 100);
+    const wu = max > 0 ? Math.round((raw / max) * 100) : 0;
     expect(root.textContent).toContain(`悟性值 ${wu}`);
   });
 
@@ -149,10 +139,8 @@ describe('全流程整合（flow manifest）', () => {
     const { raw } = expectedRaw(flowData.screens, { acceptBranch: true, evil: true });
     expect(rawWu(s)).toBe(raw);
     const wu = finalWu(s);
-    expect(wu).toBeLessThan(70); // 一路作惡 → 扣到低悟性象限
     expect(root.textContent).toContain(`悟性值 ${wu}`);
     expect(root.textContent).toContain(hall10.endings[endingKey(s)].title);
-    expect(root.textContent).toContain('執迷不悟·輪迴重修'); // lowBad
     const pro = s.choices.filter((c) => c.screen === 'prologue');
     expect(pro.length).toBe(4);
     for (const c of pro) expect(c.delta).toBe(-1);
@@ -170,25 +158,25 @@ describe('全流程整合（flow manifest）', () => {
     expect(s.mode).toBe('lite');
     expect(s.wuMax).toBe(max);
     expect(rawWu(s)).toBe(raw);
-    expect(root.textContent).toContain('悟性值 100'); // 全對全善照樣滿分
+    expect(root.textContent).toContain(`悟性值 ${max > 0 ? Math.round((raw / max) * 100) : 0}`);
   });
 
   it('有存檔時封面顯示續玩，繼續從該畫面開始', async () => {
     const storage = fakeStorage();
     const s = createState();
-    s.progress.screen = 'hall1';
+    s.progress.screen = 'interlude';
     save(s, storage);
     const root = document.createElement('div');
     await startGame({ root, loadJSON, storage });
     expect(root.textContent).toContain('繼續旅程');
     [...root.querySelectorAll('button')].find((b) => b.textContent === '繼續旅程').click();
-    expect(root.textContent).toContain(FILES['js/data/hall1.json'].intro[0].text);
+    expect(root.textContent).toContain(FILES['js/data/interlude.json'].nodes[0].text);
   });
 
   it('有存檔仍可直接選「完整遊歷」重新開始 → 序章且存檔重置', async () => {
     const storage = fakeStorage();
     const s = createState();
-    s.progress.screen = 'hall3';
+    s.progress.screen = 'interlude';
     save(s, storage);
     const root = document.createElement('div');
     await startGame({ root, loadJSON, storage });
@@ -218,32 +206,5 @@ describe('全流程整合（flow manifest）', () => {
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
-  });
-});
-
-describe('枉死城支線功德', () => {
-  const miniFlow = {
-    screens: [
-      { id: 'hall6', type: 'visit', src: 'hall6.json' },
-      { id: 'hall10', type: 'finale', src: 'hall10.json' },
-    ],
-  };
-  const miniLoad = async (p) =>
-    p === 'js/data/flow.json' ? structuredClone(miniFlow) : loadJSON(p);
-
-  it('接受並完成支線 → 隱藏功德入帳（迷你流程滿分即支線分）', async () => {
-    const storage = fakeStorage();
-    const root = document.createElement('div');
-    await startGame({ root, loadJSON: miniLoad, storage });
-    autoplay(root, storage, { acceptBranch: true });
-    expect(rawWu(load(storage))).toBe(10);
-    expect(root.textContent).toContain('悟性值 100'); // 10／滿分10 折算
-  });
-  it('婉拒支線 → 0 分', async () => {
-    const storage = fakeStorage();
-    const root = document.createElement('div');
-    await startGame({ root, loadJSON: miniLoad, storage });
-    autoplay(root, storage, { acceptBranch: false });
-    expect(root.textContent).toContain('悟性值 0');
   });
 });

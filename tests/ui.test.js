@@ -1,15 +1,13 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi } from 'vitest';
 import { el, renderNode, hallLabel, renderError } from '../js/ui/render.js';
-import { renderTrialPhase, renderKarmaCard } from '../js/ui/trialView.js';
+import { renderKarmaCard } from '../js/ui/cardView.js';
 import { renderBooklet } from '../js/ui/bookletView.js';
 import { renderVisitPhase } from '../js/ui/visitView.js';
 import { renderFinalePhase, renderShareOverlay } from '../js/ui/finaleView.js';
-import { createTrial, nextPhase } from '../js/engine/trial.js';
 import { createVisit, nextVisitPhase } from '../js/engine/visit.js';
 import { createFinale } from '../js/engine/finale.js';
 import { createState, recordChoice, creditWu } from '../js/state.js';
-import hall1 from '../js/data/hall1.json';
 import hall10 from '../js/data/hall10.json';
 
 describe('render.js', () => {
@@ -41,28 +39,19 @@ describe('render.js', () => {
   });
 });
 
-describe('trialView.js', () => {
-  it('spot 階段渲染全部供詞為可點擊，點擊回傳索引', () => {
-    const root = document.createElement('div');
-    const trial = createTrial(hall1);
-    nextPhase(trial); nextPhase(trial); // → spot
-    const onSpot = vi.fn();
-    renderTrialPhase(trial, { onSpot }, root);
-    const lines = root.querySelectorAll('.testimony-line');
-    expect(lines.length).toBe(hall1.testimony.length);
-    lines[2].click();
-    expect(onSpot).toHaveBeenCalledWith(2);
-  });
+const demoCard = { sin: '斗秤不公', result: '秤鉤獄', lesson: '公平交易', source: { chapter: 8, url: 'https://x' } };
+
+describe('cardView.js', () => {
   it('因果卡：chapter 為 null 時不顯示出處列', () => {
     const root = document.createElement('div');
-    const card = { ...hall1.karmaCard, source: { chapter: null, url: 'https://example.com' } };
+    const card = { ...demoCard, source: { chapter: null, url: 'https://example.com' } };
     renderKarmaCard(card, vi.fn(), root);
     expect(root.querySelector('.card-source')).toBeNull();
     expect(root.textContent).toContain(card.lesson);
   });
   it('因果卡：有 chapter 時顯示出處連結', () => {
     const root = document.createElement('div');
-    const card = { ...hall1.karmaCard, source: { chapter: 12, url: 'https://example.com' } };
+    const card = { ...demoCard, source: { chapter: 12, url: 'https://example.com' } };
     renderKarmaCard(card, vi.fn(), root);
     expect(root.querySelector('.card-source').textContent).toContain('第12回');
   });
@@ -75,39 +64,9 @@ describe('小修整（階段2 Task1）', () => {
     expect(hallLabel(10)).toBe('第十殿');
     expect(hallLabel(11)).toBe('第11殿');
   });
-  it('spot 階段已找到的供詞行為 disabled', () => {
-    const root = document.createElement('div');
-    const trial = createTrial(hall1);
-    nextPhase(trial); nextPhase(trial); // → spot
-    trial.foundLies.add(1);
-    renderTrialPhase(trial, { onSpot: vi.fn() }, root);
-    const lines = root.querySelectorAll('.testimony-line');
-    expect(lines[1].disabled).toBe(true);
-    expect(lines[0].disabled).toBe(false);
-  });
 });
 
 describe('小修整（階段3 Task1）', () => {
-  it('判案殿標題含殿主名', () => {
-    const root = document.createElement('div');
-    const trial = createTrial(hall1);
-    renderTrialPhase(trial, { onNextPhase: vi.fn() }, root);
-    expect(root.querySelector('.hall-title').textContent).toBe('第一殿・秦廣王');
-  });
-  it('spot 階段傳入訊息時顯示 feedback', () => {
-    const root = document.createElement('div');
-    const trial = createTrial(hall1);
-    nextPhase(trial); nextPhase(trial); // → spot
-    renderTrialPhase(trial, { onSpot: vi.fn() }, root, '這句倒是實話。');
-    expect(root.querySelector('.feedback').textContent).toBe('這句倒是實話。');
-  });
-  it('judge 階段傳入訊息時顯示 feedback', () => {
-    const root = document.createElement('div');
-    const trial = createTrial(hall1);
-    trial.phase = 'judge';
-    renderTrialPhase(trial, { onJudge: vi.fn() }, root, '再看看各獄所懲之罪。');
-    expect(root.querySelector('.feedback').textContent).toBe('再看看各獄所懲之罪。');
-  });
   it('見聞殿考題答錯訊息顯示 feedback', () => {
     const root = document.createElement('div');
     const v = createVisit(quizVisit);
@@ -123,54 +82,6 @@ describe('小修整（階段3 Task1）', () => {
     expect(root.textContent).toContain('boom');
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
     expect(onRetry).toHaveBeenCalled();
-  });
-});
-
-describe('trialView 美術整合', () => {
-  it('trial testimony 階段渲染殿景橫幅與罪魂立繪', () => {
-    const root = document.createElement('div');
-    const trial = createTrial(hall1);
-    const handlers = { onNextPhase: vi.fn() };
-    renderTrialPhase(trial, handlers, root);
-    const imgs = [...root.querySelectorAll('img')].map((i) => i.getAttribute('src'));
-    expect(imgs).toContain('assets/art/hall1-scene.webp');
-    expect(imgs).toContain('assets/art/soul-hall1.webp');
-  });
-});
-
-describe('trialView react 階段', () => {
-  const reactCase = {
-    ...hall1,
-    react: {
-      prompt: '罪魂哀求…',
-      choices: [
-        { text: '垂憐', karma: { axis: 'mercy', delta: 1 }, reply: '罪魂拭淚' },
-        { text: '冷漠', reply: '罪魂垂首' },
-      ],
-    },
-  };
-  it('未選擇時渲染 prompt 與選項，點擊以索引回呼', () => {
-    const root = document.createElement('div');
-    const trial = createTrial(reactCase);
-    trial.phase = 'react';
-    const onReact = vi.fn();
-    renderTrialPhase(trial, { onReact }, root);
-    expect(root.textContent).toContain('罪魂哀求…');
-    const btns = root.querySelectorAll('.btn-choice');
-    expect(btns.length).toBe(2);
-    btns[0].click();
-    expect(onReact).toHaveBeenCalledWith(0);
-  });
-  it('已選擇後顯示 reply 與繼續按鈕', () => {
-    const root = document.createElement('div');
-    const trial = createTrial(reactCase);
-    trial.phase = 'react';
-    trial.reactReply = '罪魂拭淚';
-    const onNextPhase = vi.fn();
-    renderTrialPhase(trial, { onNextPhase }, root);
-    expect(root.textContent).toContain('罪魂拭淚');
-    root.querySelector('.btn-next').click();
-    expect(onNextPhase).toHaveBeenCalled();
   });
 });
 

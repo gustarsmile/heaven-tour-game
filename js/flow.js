@@ -4,11 +4,10 @@ import {
 } from './state.js';
 import { loadBooklet, addCard } from './booklet.js';
 import { createPlayer } from './engine/scene.js';
-import { createTrial, nextPhase, prevPhase, spotLie, judge, react, persuade, trialScore } from './engine/trial.js';
 import { createVisit, nextVisitPhase, prevVisitPhase, answerQuiz, chooseMercy, takeBranch, visitScore } from './engine/visit.js';
 import { createFinale, nextFinalePhase, prevFinalePhase, chooseMengpo, endingKey } from './engine/finale.js';
 import { renderNode, el, hallLabel } from './ui/render.js';
-import { renderTrialPhase, renderKarmaCard } from './ui/trialView.js';
+import { renderKarmaCard } from './ui/cardView.js';
 import { renderVisitPhase } from './ui/visitView.js';
 import { renderFinalePhase, renderShareOverlay } from './ui/finaleView.js';
 import { renderBooklet } from './ui/bookletView.js';
@@ -80,7 +79,6 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     for (const scr of list) {
       const d = resources[scr.id];
       if (!d) continue;
-      if (scr.type === 'trial') max += 30;
       if (scr.type === 'visit') max += (d.quiz ? 5 : 0) + (d.branch?.rewardWu ?? 0);
     }
     return max;
@@ -119,43 +117,6 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
         onAdvance: () => { player.advance(); step(); },
         onChoose: (i) => { player.choose(i); step(); },
       }, root, { art: sceneData.art });
-    };
-    step();
-  }
-
-  function runTrial(caseData, onEnd) {
-    const trial = createTrial(caseData, hooks);
-    let message = '';
-    const step = () => {
-      setLocalBack(trial.phase !== trial.phases[0]
-        ? () => { message = ''; prevPhase(trial); step(); }
-        : null);
-      renderTrialPhase(trial, handlers, root, message);
-    };
-    const handlers = {
-      onNextPhase: () => { message = ''; nextPhase(trial); step(); },
-      onSpot: (i) => {
-        const r = spotLie(trial, i);
-        if (r.hit) audio.chime();
-        if (!r.hit) message = '濟公搖搖扇子：「這句倒是實話。再想想——孽鏡照見了什麼？」';
-        else if (!r.allFound) message = '正是謊言！但破綻不只一處，再找找。';
-        else { message = ''; nextPhase(trial); }
-        step();
-      },
-      onJudge: (i) => {
-        const r = judge(trial, i);
-        if (r.correct) audio.chime();
-        if (!r.correct) message = '濟公低聲道：「再看看各獄所懲之罪——對得上他做的事嗎？」';
-        else { message = ''; nextPhase(trial); }
-        step();
-      },
-      onReact: (i) => { react(trial, i); step(); },
-      onPersuade: (i) => { persuade(trial, i); nextPhase(trial); step(); },
-      onFinish: () => {
-        creditWu(state, currentScreenId, trialScore(trial));
-        if (caseData.postScene) runScene(caseData.postScene, onEnd);
-        else onEnd();
-      },
     };
     step();
   }
@@ -288,13 +249,6 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
 
     if (scr.type === 'scene') {
       runScene(data, goNext);
-    } else if (scr.type === 'trial') {
-      runScene(linesToScene(data.intro, data.art?.scene), () =>
-        runTrial(data, () => {
-          audio.flip();
-          setLocalBack(null);
-          renderKarmaCard(data.karmaCard, collectCard, root);
-        }));
     } else if (scr.type === 'visit') {
       runScene(linesToScene(data.intro, data.art?.scene), () =>
         runVisit(data, () => {

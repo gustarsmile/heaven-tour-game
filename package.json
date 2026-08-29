@@ -6,7 +6,8 @@
     "test": "vitest run",
     "dev": "python -m http.server 8000",
     "gen-qr": "node scripts/gen-qr.mjs",
-    "opt-art": "node scripts/optimize-art.mjs"
+    "opt-art": "node scripts/optimize-art.mjs",
+    "placeholder-art": "node scripts/placeholder-art.mjs"
   },
   "devDependencies": {
     "happy-dom": "^15.11.3",
