@@ -1,6 +1,6 @@
 # 美術風格（2026-08-29 使用者定案）
 
-樣張經四輪修改後定案：`interlude-night`（濟公乘蓮台夜訪，兼封面）、`gate-scene`（南天門）、`donghua-scene`（東華宮花園）、`tree-4`（茂盛級原靈樹）。
+樣張經四輪修改後定案：`interlude-night`（濟公乘蓮台夜訪）、`gate-scene`（南天門）、`donghua-scene`（東華宮花園）、`tree-4`（茂盛級原靈樹）。**封面與 og 圖＝南天門 `gate-scene`**（使用者定案；`art-src/cover.png` 為其複本）。
 
 ## 風格前綴（每張提示詞逐字以此開頭）
 

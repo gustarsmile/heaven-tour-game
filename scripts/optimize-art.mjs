@@ -15,6 +15,6 @@ for (const f of readdirSync(SRC).filter((n) => n.endsWith('.png'))) {
 // quality:80 仍達 574KB，超過 500KB 守門；降至 60 並拉高壓縮層級後為 432KB，留有餘裕
 await sharp(`${SRC}/cover.png`)
   .resize(1200, 630, { fit: 'cover' })
-  .png({ palette: true, quality: 60, compressionLevel: 9, effort: 10 })
+  .png({ palette: true, quality: 45, compressionLevel: 9, effort: 10 })
   .toFile('assets/og.png');
 console.log('assets/og.png');
