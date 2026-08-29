@@ -86,13 +86,13 @@ describe('全流程整合（flow manifest）', () => {
     expect(root.textContent).not.toContain('繼續旅程');
   });
 
-  it('通關後存檔含序章四筆選擇紀錄（label、權重×2、screen 欄位）', async () => {
+  it('通關後存檔含序章五筆選擇紀錄（label、權重×2、screen 欄位）', async () => {
     const storage = fakeStorage();
     const root = document.createElement('div');
     await startGame({ root, loadJSON, storage });
     autoplay(root, storage, { acceptBranch: true });
     const pro = load(storage).choices.filter((c) => c.screen === 'prologue');
-    expect(pro.length).toBe(4);
+    expect(pro.length).toBe(5);
     for (const c of pro) {
       expect(c.weight).toBe(2);
       expect(c.delta).toBe(1); // autoplay 全選最善
@@ -142,7 +142,7 @@ describe('全流程整合（flow manifest）', () => {
     expect(root.textContent).toContain(`悟性值 ${wu}`);
     expect(root.textContent).toContain(hall10.endings[endingKey(s)].title);
     const pro = s.choices.filter((c) => c.screen === 'prologue');
-    expect(pro.length).toBe(4);
+    expect(pro.length).toBe(5);
     for (const c of pro) expect(c.delta).toBe(-1);
   });
 
@@ -206,5 +206,27 @@ describe('全流程整合（flow manifest）', () => {
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
+  });
+});
+
+describe('場景圖軌跡（節點級換景）', () => {
+  it('過場：夜訪圖 → 蓮台圖，返回時回退', async () => {
+    const storage = fakeStorage();
+    const s = createState();
+    s.progress.screen = 'interlude';
+    save(s, storage);
+    const root = document.createElement('div');
+    let back = null;
+    const nav = { setBack(fn) { back = fn; }, setMenu() {}, closeMenu() {}, toast() {} };
+    await startGame({ root, loadJSON, storage, nav });
+    [...root.querySelectorAll('button')].find((b) => b.textContent === '繼續旅程').click();
+    const art = () => root.querySelector('.scene-art img')?.getAttribute('src');
+    expect(art()).toBe('assets/art/interlude-night.webp');
+    const nodes = FILES['js/data/interlude.json'].nodes;
+    const lotusIdx = nodes.findIndex((n) => n.art === 'interlude-lotus.webp');
+    for (let i = 0; i < lotusIdx; i++) root.querySelector('.btn-next').click();
+    expect(art()).toBe('assets/art/interlude-lotus.webp');
+    back();
+    expect(art()).toBe('assets/art/interlude-night.webp');
   });
 });

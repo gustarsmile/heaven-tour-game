@@ -109,14 +109,16 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
 
   function runScene(sceneData, onEnd) {
     const player = createPlayer(sceneData, hooks);
+    // 場景圖軌跡：節點帶 art 者自該節點起換場景圖，延續至下一個帶 art 的節點；返回時同步回退
+    const artTrail = [player.current().art ?? sceneData.art];
     const step = () => {
       const node = player.current();
       if (node.type === 'end') { onEnd(); return; }
-      setLocalBack(player.canBack() ? () => { player.back(); step(); } : null);
+      setLocalBack(player.canBack() ? () => { player.back(); artTrail.pop(); step(); } : null);
       renderNode(node, {
-        onAdvance: () => { player.advance(); step(); },
-        onChoose: (i) => { player.choose(i); step(); },
-      }, root, { art: sceneData.art });
+        onAdvance: () => { player.advance(); artTrail.push(player.current().art ?? artTrail.at(-1)); step(); },
+        onChoose: (i) => { player.choose(i); artTrail.push(player.current().art ?? artTrail.at(-1)); step(); },
+      }, root, { art: artTrail.at(-1) });
     };
     step();
   }
