@@ -5,10 +5,12 @@ import {
 import { loadBooklet, addCard } from './booklet.js';
 import { createPlayer } from './engine/scene.js';
 import { createVisit, nextVisitPhase, prevVisitPhase, answerQuiz, chooseMercy, takeBranch, visitScore } from './engine/visit.js';
+import { createTreeScreen, nextTreePhase, prevTreePhase, answerCase, caseIndex, treeScore, treeMax } from './engine/treeScreen.js';
 import { createFinale, nextFinalePhase, prevFinalePhase, chooseMengpo, endingKey } from './engine/finale.js';
 import { renderNode, el, hallLabel } from './ui/render.js';
 import { renderCard } from './ui/cardView.js';
 import { renderVisitPhase } from './ui/visitView.js';
+import { renderTreePhase } from './ui/treeView.js';
 import { renderFinalePhase, renderShareOverlay } from './ui/finaleView.js';
 import { renderBooklet } from './ui/bookletView.js';
 import { renderCover } from './ui/coverView.js';
@@ -51,6 +53,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
   document.title = GAME_TITLE;
 
   const flow = await loadJSON('js/data/flow.json');
+  const treeData = await loadJSON('js/data/tree.json');
   const resources = {};
   await Promise.all(
     flow.screens.filter((s) => s.src).map(async (s) => {
@@ -73,13 +76,14 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     return ids.map((id) => flow.screens.find((s) => s.id === id)).filter(Boolean);
   }
 
-  // 該模式滿分：判案殿 30（破綻10＋斷獄10＋勸化10）、考題 5、支線功德
+  // 該模式滿分：考題 5、案例樹題 5、支線功德
   function computeWuMax(list) {
     let max = 0;
     for (const scr of list) {
       const d = resources[scr.id];
       if (!d) continue;
       if (scr.type === 'visit') max += (d.quiz ? 5 : 0) + (d.branch?.rewardWu ?? 0);
+      if (scr.type === 'tree') max += treeMax(d);
     }
     return max;
   }
@@ -155,6 +159,28 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     step();
   }
 
+  function runTree(data, onEnd) {
+    const t = createTreeScreen(data);
+    let message = '';
+    const step = () => {
+      setLocalBack(t.phase !== t.phases[0]
+        ? () => { message = ''; prevTreePhase(t); step(); }
+        : null);
+      renderTreePhase(t, state, treeData, handlers, root, message);
+    };
+    const handlers = {
+      onNextPhase: () => { message = ''; nextTreePhase(t); step(); },
+      onCase: (i) => {
+        const r = answerCase(t, i);
+        if (r.correct) audio.chime();
+        message = r.correct ? '' : data.cases[caseIndex(t)].hint;
+        step();
+      },
+      onFinish: () => { creditWu(state, currentScreenId, treeScore(t)); onEnd(); },
+    };
+    step();
+  }
+
   function bookletEntries() {
     const owned = loadBooklet(storage);
     return flow.screens
@@ -211,6 +237,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
   function menuTitleOf(scr) {
     const d = resources[scr.id];
     if (d?.menuTitle) return d.menuTitle;
+    if (d?.title) return d.title;
     if (d?.hall) return `${hallLabel(d.hall)}・${d.king}`;
     return scr.id === PROLOGUE_ID ? '序章・陽間一日' : '過場';
   }
@@ -254,6 +281,14 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     } else if (scr.type === 'visit') {
       runScene(linesToScene(data.intro, data.art?.scene), () =>
         runVisit(data, () => {
+          audio.flip();
+          setLocalBack(null);
+          renderCard(data.card, collectCard, root);
+        }));
+    } else if (scr.type === 'tree') {
+      runScene(linesToScene(data.intro, data.art?.scene), () =>
+        runTree(data, () => {
+          if (!data.card) { goNext(); return; }
           audio.flip();
           setLocalBack(null);
           renderCard(data.card, collectCard, root);

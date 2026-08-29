@@ -97,6 +97,30 @@ function validateVisit(v) {
   expectArt(v.art.watch);
 }
 
+function validateTree(t) {
+  expect(['sapling', 'read']).toContain(t.mode);
+  expect(t.title.length).toBeGreaterThan(0);
+  expect(t.intro.length).toBeGreaterThanOrEqual(1);
+  expect(t.closing.length).toBeGreaterThan(0);
+  expectArt(t.art.scene);
+  if (t.mode === 'sapling') {
+    expect(t.look.lines.length).toBeGreaterThanOrEqual(1);
+    expect(t.card).toBeUndefined();
+    return;
+  }
+  expect(t.garden.lines.length).toBeGreaterThanOrEqual(1);
+  expect(t.read.lines.length).toBeGreaterThanOrEqual(1);
+  expect(t.cases.length).toBeGreaterThanOrEqual(3);
+  for (const c of t.cases) {
+    for (const key of ['desc', 'question', 'hint', 'reveal']) expect(c[key].length).toBeGreaterThan(0);
+    expect(c.options.length).toBe(3);
+    expect(c.answer).toBeGreaterThanOrEqual(0);
+    expect(c.answer).toBeLessThan(3);
+    expectArt(c.art);
+  }
+  validateCard(t.card);
+}
+
 function validateFinale(f) {
   expect(f.king.length).toBeGreaterThan(0);
   expect(f.intro.length).toBeGreaterThanOrEqual(1);
@@ -143,7 +167,7 @@ describe('flow.json 驗證', () => {
     expect(flow.screens[0].id).toBe('prologue');
     expect(flow.screens.at(-1).type).toBe('finale');
     for (const s of flow.screens) {
-      expect(['scene', 'visit', 'finale']).toContain(s.type);
+      expect(['scene', 'visit', 'tree', 'finale']).toContain(s.type);
       expect(FILES[s.src]).toBeDefined();
       if (s.type === 'scene') expectArt(FILES[s.src].art);
     }
@@ -161,6 +185,8 @@ describe('內容資料驗證', () => {
       it(`${scr.src}：場景結構正確`, () => validateScene(FILES[scr.src]));
     } else if (scr.type === 'visit') {
       it(`${scr.src}：見聞殿結構正確`, () => validateVisit(FILES[scr.src]));
+    } else if (scr.type === 'tree') {
+      it(`${scr.src}：看樹站結構正確`, () => validateTree(FILES[scr.src]));
     } else if (scr.type === 'finale') {
       it(`${scr.src}：結算關結構正確`, () => validateFinale(FILES[scr.src]));
     }

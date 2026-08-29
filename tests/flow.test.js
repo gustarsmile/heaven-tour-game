@@ -44,6 +44,7 @@ function expectedRaw(screens, { acceptBranch } = {}) {
       max += data.branch.rewardWu;
       if (acceptBranch) raw += data.branch.rewardWu;
     }
+    if (scr.type === 'tree' && data.mode === 'read') { max += data.cases.length * 5; raw += data.cases.length * 5; }
   }
   return { raw, max };
 }
@@ -64,8 +65,10 @@ function autoplay(root, storage, { acceptBranch = true, evil = false } = {}) {
 
     const choices = root.querySelectorAll('.btn-choice');
     if (choices.length) {
+      const list = choices[0].closest('.choices');
       let idx = 0;
-      if (root.querySelector('.visit-box') && data.quiz) idx = data.quiz.answer;
+      if (list?.dataset.kind === 'case') idx = data.cases[Number(list.dataset.index)].answer;
+      else if (list?.dataset.kind === 'quiz') idx = data.quiz.answer;
       else if (evil) idx = choices.length - 1; // 道德選擇全選最惡（末選項慣例）
       choices[idx].click();
       continue;
@@ -98,6 +101,14 @@ describe('全流程整合（flow manifest）', () => {
       expect(c.delta).toBe(1); // autoplay 全選最善
       expect(c.label.length).toBeGreaterThan(0);
     }
+  });
+
+  it('完美通關：東華宮四題案例樹得 20 分入該站', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON, storage });
+    autoplay(root, storage);
+    expect(load(storage).wuByScreen.donghua).toBe(20);
   });
 
   it('完美通關（接受支線）：悟性 100，highGood；重新開始回封面再入序章', async () => {
@@ -202,7 +213,7 @@ describe('全流程整合（flow manifest）', () => {
     await startGame({ root, loadJSON, storage });
     autoplay(root, storage, { acceptBranch: true });
     const cardScreens = flowData.screens
-      .filter((s) => resourceOf(s.id)?.karmaCard).map((s) => s.id);
+      .filter((s) => resourceOf(s.id)?.card).map((s) => s.id);
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());

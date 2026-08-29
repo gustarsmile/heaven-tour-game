@@ -270,6 +270,24 @@ body {
   background: var(--ink-2);
 }
 
+/* ===== 看樹（tree 型別） ===== */
+.tree-box .hall-title { letter-spacing: 0.15em; }
+.sapling-leaves { display: flex; gap: 6px; justify-content: center; margin: 4px 0 14px; min-height: 14px; }
+.leaf { width: 14px; height: 14px; background: #6f9a4e; border-radius: 14px 0; transform: rotate(-20deg); }
+.tree-verdicts { display: grid; gap: 10px; margin: 12px 0; }
+.tree-verdict {
+  border: 1px solid var(--gold-dim);
+  border-left-width: 4px;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: rgba(169, 131, 42, 0.06);
+}
+.tree-verdict.verdict-good { border-left-color: #6f9a4e; }
+.tree-verdict.verdict-bad { border-left-color: var(--vermilion); background: rgba(168, 67, 42, 0.07); }
+.verdict-part { color: var(--gold); letter-spacing: 0.2em; font-size: 0.9rem; }
+.verdict-text { margin: 4px 0 0; }
+.tree-level { text-align: center; color: var(--gold); letter-spacing: 0.3em; margin: 8px 0; }
+
 /* ===== 固定導覽：左上返回＋選單、右上音效 ===== */
 #nav-bar {
   position: fixed;
