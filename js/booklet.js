@@ -1,6 +1,6 @@
 import { safeStorage } from './state.js';
 
-const BOOKLET_KEY = 'hellTourBooklet.v1'; // 跨輪保留：重新開始不清除，重玩可補完
+const BOOKLET_KEY = 'heavenTourBooklet.v1'; // 跨輪保留：重新開始不清除，重玩可補完
 
 export function loadBooklet(storage) {
   try {

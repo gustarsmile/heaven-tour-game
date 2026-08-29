@@ -3,9 +3,7 @@ import { WU_CAP, KARMA_PENALTY, PROLOGUE_ID, DEFAULT_MODE } from './config.js';
 export const AXES = ['honesty', 'speech', 'filial', 'mercy'];
 export const AXIS_LABELS = { honesty: '誠實', speech: '口業', filial: '孝道', mercy: '慈悲' };
 
-const SAVE_KEY = 'hellTourSave.v3';
-const V2_SAVE_KEY = 'hellTourSave.v2'; // v2 可遷移：wu 併入單一桶、choices 依 scene 前綴補 screen
-const LEGACY_SAVE_KEYS = ['hellTourSave.v1']; // v1 無選擇紀錄，孽鏡反照無從回放，直接淘汰
+const SAVE_KEY = 'heavenTourSave.v1';
 
 export function createState(mode = DEFAULT_MODE) {
   return {
@@ -81,21 +79,6 @@ export function deserialize(json) {
   };
 }
 
-// v2 → v3：wu 無法回溯分殿，整筆放進 _v2 桶；choices 依 scene id 前綴補 screen 欄位
-function migrateV2(json) {
-  const raw = JSON.parse(json);
-  const state = createState();
-  if (typeof raw.wu === 'number' && raw.wu > 0) state.wuByScreen._v2 = raw.wu;
-  if (Array.isArray(raw.choices)) {
-    state.choices = raw.choices.map((c) => ({
-      screen: c.scene === PROLOGUE_ID ? PROLOGUE_ID : (c.scene?.match(/^hall\d+/)?.[0] ?? '_v2'),
-      ...c,
-    }));
-  }
-  state.progress = { screen: raw.progress?.screen ?? PROLOGUE_ID };
-  return state;
-}
-
 export function safeStorage(storage) {
   if (storage !== undefined) return storage;
   try {
@@ -118,17 +101,8 @@ export function load(storage) {
   try {
     const s = safeStorage(storage);
     if (!s) return null;
-    for (const k of LEGACY_SAVE_KEYS) s.removeItem(k);
     const json = s.getItem(SAVE_KEY);
-    if (json) return deserialize(json);
-    const v2 = s.getItem(V2_SAVE_KEY);
-    if (v2) {
-      const state = migrateV2(v2);
-      s.removeItem(V2_SAVE_KEY);
-      save(state, s);
-      return state;
-    }
-    return null;
+    return json ? deserialize(json) : null;
   } catch {
     clearSave(storage);
     return null;
@@ -138,10 +112,7 @@ export function load(storage) {
 export function clearSave(storage) {
   try {
     const s = safeStorage(storage);
-    if (s) {
-      s.removeItem(SAVE_KEY);
-      s.removeItem(V2_SAVE_KEY);
-    }
+    if (s) s.removeItem(SAVE_KEY);
   } catch {
     /* 忽略 */
   }

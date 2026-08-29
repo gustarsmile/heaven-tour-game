@@ -22,14 +22,14 @@ describe('善書冊儲存', () => {
   it('與 run 存檔 key 無關（清 run 存檔不影響冊）', () => {
     const st = fakeStorage();
     addCard('hall1', st);
-    st.removeItem('hellTourSave.v2');
+    st.removeItem('heavenTourSave.v1');
     expect(loadBooklet(st)).toEqual(['hall1']);
   });
   it('損壞 JSON 或非陣列 → 空陣列', () => {
     const st = fakeStorage();
-    st.setItem('hellTourBooklet.v1', '{oops');
+    st.setItem('heavenTourBooklet.v1', '{oops');
     expect(loadBooklet(st)).toEqual([]);
-    st.setItem('hellTourBooklet.v1', '"x"');
+    st.setItem('heavenTourBooklet.v1', '"x"');
     expect(loadBooklet(st)).toEqual([]);
   });
   it('storage 擲錯不擲錯', () => {

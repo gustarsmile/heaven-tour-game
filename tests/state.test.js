@@ -122,9 +122,9 @@ describe('存讀檔', () => {
   });
   it('load 讀到損壞 JSON 回 null 並清除存檔', () => {
     const st = fakeStorage();
-    st.setItem('hellTourSave.v3', '{oops');
+    st.setItem('heavenTourSave.v1', '{oops');
     expect(load(st)).toBeNull();
-    expect(st.getItem('hellTourSave.v3')).toBeNull();
+    expect(st.getItem('heavenTourSave.v1')).toBeNull();
   });
   it('storage 擲錯時 save/load/clearSave 不擲錯', () => {
     const boom = {
@@ -135,6 +135,13 @@ describe('存讀檔', () => {
     expect(() => save(createState(), boom)).not.toThrow();
     expect(load(boom)).toBeNull();
     expect(() => clearSave(boom)).not.toThrow();
+  });
+  it('save 寫入 heavenTourSave.v1，且不理會地獄篇舊鍵', () => {
+    const st = fakeStorage();
+    st.setItem('hellTourSave.v3', JSON.stringify(createState()));
+    expect(load(st)).toBeNull();
+    save(createState(), st);
+    expect(st.getItem('heavenTourSave.v1')).not.toBeNull();
   });
 });
 
@@ -161,38 +168,5 @@ describe('選擇紀錄（階段3）', () => {
     expect(deserialize(JSON.stringify(legacy)).choices).toEqual([]);
     legacy.choices = 'oops';
     expect(deserialize(JSON.stringify(legacy)).choices).toEqual([]);
-  });
-});
-
-describe('存檔 v3 與舊檔遷移', () => {
-  it('save 寫入 hellTourSave.v3', () => {
-    const st = fakeStorage();
-    save(createState(), st);
-    expect(st.getItem('hellTourSave.v3')).not.toBeNull();
-  });
-  it('v2 存檔遷移：wu 併入 _v2 桶、choices 依 scene 前綴補 screen、v2 鍵移除', () => {
-    const st = fakeStorage();
-    st.setItem('hellTourSave.v2', JSON.stringify({
-      wu: 55,
-      karma: { honesty: 1, speech: 0, filial: 0, mercy: 0 },
-      choices: [
-        { scene: 'prologue', label: '早市', text: 'a', axis: 'honesty', delta: 1, weight: 2 },
-        { scene: 'hall3-gossip', label: null, text: 'b', axis: 'speech', delta: -1, weight: 1 },
-      ],
-      progress: { screen: 'hall5' },
-    }));
-    const s = load(st);
-    expect(rawWu(s)).toBe(55);
-    expect(s.choices[0].screen).toBe('prologue');
-    expect(s.choices[1].screen).toBe('hall3');
-    expect(s.progress.screen).toBe('hall5');
-    expect(st.getItem('hellTourSave.v2')).toBeNull();
-    expect(st.getItem('hellTourSave.v3')).not.toBeNull();
-  });
-  it('只有 v1 舊檔時 load 回 null 並移除 v1', () => {
-    const st = fakeStorage();
-    st.setItem('hellTourSave.v1', JSON.stringify(createState()));
-    expect(load(st)).toBeNull();
-    expect(st.getItem('hellTourSave.v1')).toBeNull();
   });
 });
