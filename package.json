@@ -1,0 +1,19 @@
+{
+  "name": "hell-tour-game",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "dev": "python -m http.server 8000",
+    "gen-qr": "node scripts/gen-qr.mjs",
+    "opt-art": "node scripts/optimize-art.mjs"
+  },
+  "devDependencies": {
+    "happy-dom": "^15.11.3",
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.34.5",
+    "vitest": "^4.1.10"
+  }
+}
