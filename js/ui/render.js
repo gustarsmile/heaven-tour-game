@@ -1,4 +1,5 @@
 import { enableLightbox } from './lightbox.js';
+import { readTree } from '../engine/tree.js';
 
 export function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -51,6 +52,32 @@ export function renderNode(node, handlers, root, opts = {}) {
     body.appendChild(list);
   }
   root.appendChild(box);
+}
+
+// 共用視圖輔助：見聞／看樹／結算三種畫面都用得到的「繼續」鈕、逐句文字、樹況評語列表
+export function appendNext(box, label, onClick) {
+  const btn = el('button', 'btn btn-next', label);
+  btn.addEventListener('click', onClick);
+  box.appendChild(btn);
+}
+
+export function appendLines(box, lines) {
+  for (const l of lines) {
+    if (l.speaker) box.appendChild(el('div', 'speaker', l.speaker));
+    box.appendChild(el('p', 'text', l.text));
+    if (l.img) box.appendChild(artImg(l.img, 'art-figure'));
+  }
+}
+
+export function appendTreeVerdicts(box, state, treeData) {
+  const list = el('div', 'tree-verdicts');
+  for (const r of readTree(state, treeData)) {
+    const item = el('div', `tree-verdict verdict-${r.state}`);
+    item.appendChild(el('div', 'verdict-part', `${r.part}・${r.label}`));
+    item.appendChild(el('p', 'verdict-text', r.text));
+    list.appendChild(item);
+  }
+  box.appendChild(list);
 }
 
 export function renderError(err, onRetry, root) {

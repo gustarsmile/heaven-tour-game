@@ -1,20 +1,6 @@
-import { el, artImg, sceneFrame } from './render.js';
+import { el, sceneFrame, appendNext, appendLines, appendTreeVerdicts } from './render.js';
 import { caseIndex } from '../engine/treeScreen.js';
-import { readTree, saplingLeaves, treeLevel } from '../engine/tree.js';
-
-function appendNext(box, label, onClick) {
-  const btn = el('button', 'btn btn-next', label);
-  btn.addEventListener('click', onClick);
-  box.appendChild(btn);
-}
-
-function appendLines(box, lines) {
-  for (const l of lines) {
-    if (l.speaker) box.appendChild(el('div', 'speaker', l.speaker));
-    box.appendChild(el('p', 'text', l.text));
-    if (l.img) box.appendChild(artImg(l.img, 'art-figure'));
-  }
-}
+import { saplingLeaves, treeLevel } from '../engine/tree.js';
 
 // 主圖：案例階段＝該案例樹；look＝樹苗；read＝目前樹況；其餘＝站景
 function artFor(t, state, treeData) {
@@ -65,14 +51,7 @@ export function renderTreePhase(t, state, treeData, handlers, root, message = ''
     }
   } else if (t.phase === 'read') {
     appendLines(box, d.read.lines);
-    const list = el('div', 'tree-verdicts');
-    for (const r of readTree(state, treeData)) {
-      const item = el('div', `tree-verdict verdict-${r.state}`);
-      item.appendChild(el('div', 'verdict-part', `${r.part}・${r.label}`));
-      item.appendChild(el('p', 'verdict-text', r.text));
-      list.appendChild(item);
-    }
-    box.appendChild(list);
+    appendTreeVerdicts(box, state, treeData);
     appendNext(box, '繼續 ▸', handlers.onNextPhase);
   } else if (t.phase === 'closing') {
     box.appendChild(el('p', 'text', d.closing));

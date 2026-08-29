@@ -29,9 +29,6 @@ export function createPlayer(scene, hooks = {}) {
       if (current.type !== 'choice') throw new Error('choose() 僅適用於 choice 節點');
       const choice = current.choices[index];
       if (!choice) throw new Error(`選項不存在：${index}`);
-      if (choice.karma && hooks.onKarma) {
-        hooks.onKarma(choice.karma.axis, choice.karma.delta, weight);
-      }
       if (choice.karma && hooks.onChoice) {
         hooks.onChoice({
           scene: scene.id,

@@ -14,16 +14,16 @@ describe('善書冊儲存', () => {
   it('初始為空；addCard 累積且去重', () => {
     const st = fakeStorage();
     expect(loadBooklet(st)).toEqual([]);
-    addCard('hall1', st);
-    addCard('hall2', st);
-    addCard('hall1', st);
-    expect(loadBooklet(st)).toEqual(['hall1', 'hall2']);
+    addCard('gate', st);
+    addCard('donghua', st);
+    addCard('gate', st);
+    expect(loadBooklet(st)).toEqual(['gate', 'donghua']);
   });
   it('與 run 存檔 key 無關（清 run 存檔不影響冊）', () => {
     const st = fakeStorage();
-    addCard('hall1', st);
+    addCard('gate', st);
     st.removeItem('heavenTourSave.v1');
-    expect(loadBooklet(st)).toEqual(['hall1']);
+    expect(loadBooklet(st)).toEqual(['gate']);
   });
   it('損壞 JSON 或非陣列 → 空陣列', () => {
     const st = fakeStorage();
@@ -39,6 +39,6 @@ describe('善書冊儲存', () => {
       removeItem() { throw new Error('denied'); },
     };
     expect(loadBooklet(boom)).toEqual([]);
-    expect(() => addCard('hall1', boom)).not.toThrow();
+    expect(() => addCard('gate', boom)).not.toThrow();
   });
 });

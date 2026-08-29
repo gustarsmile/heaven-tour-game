@@ -68,7 +68,7 @@ describe('answerQuiz', () => {
     expect(answerQuiz(v, 0).correct).toBe(false);
     expect(answerQuiz(v, 1)).toEqual({ correct: true, points: 0 });
   });
-  it('已答對後再呼叫回傳原結果；非 ask 階段擲錯', () => {
+  it('已答對後再呼叫回傳原結果；非 quiz 階段擲錯', () => {
     const v = createVisit(quizVisit);
     expect(() => answerQuiz(v, 1)).toThrow();
     nextVisitPhase(v);
@@ -78,22 +78,16 @@ describe('answerQuiz', () => {
 });
 
 describe('chooseMercy', () => {
-  it('套用 karma（權重1）並回傳 reply；只作用一次', () => {
-    const onKarma = vi.fn();
-    const v = createVisit(mercyVisit, { onKarma });
+  it('套用選項並回傳 reply；只作用一次', () => {
+    const v = createVisit(mercyVisit);
     nextVisitPhase(v);
     expect(chooseMercy(v, 0)).toEqual({ reply: 'r1' });
-    expect(onKarma).toHaveBeenCalledWith('li', 1, 1);
-    expect(chooseMercy(v, 2)).toEqual({ reply: 'r1' });
-    expect(onKarma).toHaveBeenCalledTimes(1);
+    expect(chooseMercy(v, 2)).toEqual({ reply: 'r1' }); // 已作用，重複呼叫回傳原 reply
   });
-  it('無 karma 選項不觸發 hook；選項不存在擲錯', () => {
-    const onKarma = vi.fn();
-    const v = createVisit(mercyVisit, { onKarma });
+  it('選項不存在擲錯', () => {
+    const v = createVisit(mercyVisit);
     nextVisitPhase(v);
     expect(() => chooseMercy(v, 9)).toThrow();
-    chooseMercy(v, 1);
-    expect(onKarma).not.toHaveBeenCalled();
   });
 });
 
@@ -105,7 +99,7 @@ describe('takeBranch 與 visitScore', () => {
     takeBranch(v, false);
     expect(v.branchTaken).toBe(false);
   });
-  it('無考題殿 visitScore 為 0', () => {
+  it('無考題站 visitScore 為 0', () => {
     expect(visitScore(createVisit(mercyVisit))).toBe(0);
   });
 });

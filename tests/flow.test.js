@@ -128,6 +128,8 @@ describe('全流程整合（flow manifest）', () => {
     expect(root.textContent).toContain(`悟性值 ${wu}`);
     expect(root.textContent).toContain(yaochi.endings[endingKey(s)].title);
     expect(root.textContent).toContain('道果圓熟・蓮台九品');
+    const gate = s.choices.filter((c) => c.screen === 'gate');
+    expect(gate).toEqual([expect.objectContaining({ axis: 'li', delta: 1, weight: 1 })]);
     // 重新開始 → 回封面 → 選完整遊歷 → 序章第一句
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
     expect(root.textContent).toContain('完整遊歷');
@@ -151,7 +153,7 @@ describe('全流程整合（flow manifest）', () => {
     await startGame({ root, loadJSON, storage });
     autoplay(root, storage, { acceptBranch: true, evil: true });
     const s = load(storage);
-    const { raw } = expectedRaw(flowData.screens, { acceptBranch: true, evil: true });
+    const { raw } = expectedRaw(flowData.screens, { acceptBranch: true });
     expect(rawWu(s)).toBe(raw);
     const wu = finalWu(s);
     expect(finalWu(s)).toBeLessThan(70);
@@ -161,6 +163,8 @@ describe('全流程整合（flow manifest）', () => {
     const pro = s.choices.filter((c) => c.screen === 'prologue');
     expect(pro.length).toBe(5);
     for (const c of pro) expect(c.delta).toBe(-1);
+    const gate = s.choices.filter((c) => c.screen === 'gate');
+    expect(gate).toEqual([expect.objectContaining({ axis: 'li', delta: -1, weight: 1 })]);
   });
 
   it('精簡速覽：只走精選殿，悟性依精簡滿分折算', async () => {
@@ -227,6 +231,21 @@ describe('全流程整合（flow manifest）', () => {
 });
 
 describe('場景圖軌跡（節點級換景）', () => {
+  it('序章第一站首次抉擇後，◂ 立即停用（setBack 收到 null）', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    let lastBack = 'unset';
+    const nav = { setBack(fn) { lastBack = fn; }, setMenu() {}, closeMenu() {}, toast() {} };
+    await startGame({ root, loadJSON, storage, nav });
+    [...root.querySelectorAll('button')].find((b) => b.textContent.includes('完整遊歷')).click();
+    while (root.querySelector('.btn-next') && !root.querySelector('.btn-choice')) {
+      root.querySelector('.btn-next').click();
+    }
+    expect(root.querySelector('.btn-choice')).toBeTruthy();
+    root.querySelectorAll('.btn-choice')[0].click();
+    expect(lastBack).toBe(null);
+  });
+
   it('過場：夜訪圖 → 蓮台圖，返回時回退', async () => {
     const storage = fakeStorage();
     const s = createState();

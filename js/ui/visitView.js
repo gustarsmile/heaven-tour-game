@@ -1,4 +1,4 @@
-import { el, artImg, sceneFrame } from './render.js';
+import { el, artImg, sceneFrame, appendNext } from './render.js';
 
 export function renderVisitPhase(visit, handlers, root, message = '') {
   root.innerHTML = '';
@@ -71,10 +71,4 @@ export function renderVisitPhase(visit, handlers, root, message = '') {
     appendNext(box, '收下天音卡 ▸', handlers.onFinish);
   }
   root.appendChild(frame.box);
-}
-
-function appendNext(box, label, onClick) {
-  const btn = el('button', 'btn btn-next', label);
-  btn.addEventListener('click', onClick);
-  box.appendChild(btn);
 }

@@ -76,7 +76,7 @@ describe('drawShareCard', () => {
     // 壓暗色罩緊接在底圖之後：找到底圖呼叫的 index，其後應有 rgba 暗色 fillStyle + 滿版 fillRect
     const bgIdx = ctx.calls.indexOf(bgCall);
     const after = ctx.calls.slice(bgIdx + 1);
-    const overlayStyleIdx = after.findIndex(([n, v]) => n === 'fillStyle' && v === 'rgba(255, 253, 246, 0.6)');
+    const overlayStyleIdx = after.findIndex(([n, v]) => n === 'fillStyle' && v === 'rgba(255, 253, 246, 0.42)');
     expect(overlayStyleIdx).toBeGreaterThanOrEqual(0);
     expect(after[overlayStyleIdx + 1]).toEqual(['fillRect', 0, 0, CARD_W, CARD_H]);
   });
@@ -84,7 +84,7 @@ describe('drawShareCard', () => {
     const ctx = fakeCtx();
     drawShareCard(ctx, payload, null, null);
     expect(ctx.calls.some(([n]) => n === 'drawImage')).toBe(false);
-    expect(ctx.calls.some(([n, v]) => n === 'fillStyle' && v === 'rgba(255, 253, 246, 0.6)')).toBe(false);
+    expect(ctx.calls.some(([n, v]) => n === 'fillStyle' && v === 'rgba(255, 253, 246, 0.42)')).toBe(false);
     expect(ctx.calls.some(([n, ...a]) => n === 'fillRect' && a[0] === 48 && a[1] === 48)).toBe(true);
   });
   it('QR 移至 y=1100（避開內框底 1368）', () => {

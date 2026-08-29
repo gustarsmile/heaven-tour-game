@@ -80,7 +80,7 @@ describe('cardView.js', () => {
   });
 });
 
-describe('小修整（階段3 Task1）', () => {
+describe('小修整', () => {
   it('見聞殿考題答錯訊息顯示 feedback', () => {
     const root = document.createElement('div');
     const v = createVisit(quizVisit);
@@ -102,7 +102,7 @@ describe('小修整（階段3 Task1）', () => {
 const base = {
   id: 'v-demo', type: 'visit', title: '南天門・把關',
   intro: [{ speaker: '旁白', text: 'x' }],
-  watch: { title: '某獄', panels: [{ caption: '其一' }] },
+  watch: { title: '某站', panels: [{ caption: '其一' }] },
   closing: '走吧。',
   card: { title: 't', lesson: 'l', quote: 'q', speaker: 's', source: { chapter: 1, url: 'https://x' } },
 };
@@ -128,12 +128,12 @@ const branchVisit = {
 };
 
 describe('visitView', () => {
-  it('watch 階段渲染殿名、獄名與觀刑格', () => {
+  it('watch 階段渲染站名、副標與觀覽格', () => {
     const root = document.createElement('div');
     const v = createVisit(quizVisit);
     renderVisitPhase(v, { onNextPhase: vi.fn() }, root);
     expect(root.textContent).toContain('南天門・把關');
-    expect(root.textContent).toContain('某獄');
+    expect(root.textContent).toContain('某站');
     expect(root.querySelectorAll('.watch-panel').length).toBe(1);
   });
   it('quiz 未答時渲染選項並以索引回呼；答對後顯示 reveal 與繼續鈕', () => {

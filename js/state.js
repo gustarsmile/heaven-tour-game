@@ -76,6 +76,17 @@ export function serialize(state) {
   return JSON.stringify(state);
 }
 
+// 存檔可能來自舊版或被竄改；只留下值為有限數字的分站分數，避免壞資料讓悟性值算出 NaN
+function sanitizeWuByScreen(wuByScreen) {
+  const clean = {};
+  if (wuByScreen && typeof wuByScreen === 'object') {
+    for (const [id, v] of Object.entries(wuByScreen)) {
+      if (Number.isFinite(v)) clean[id] = v;
+    }
+  }
+  return clean;
+}
+
 export function deserialize(json) {
   const raw = JSON.parse(json);
   const base = createState(raw.mode);
@@ -83,7 +94,7 @@ export function deserialize(json) {
   return {
     ...base,
     ...raw,
-    wuByScreen: { ...(raw.wuByScreen ?? {}) },
+    wuByScreen: sanitizeWuByScreen(raw.wuByScreen),
     choices: Array.isArray(raw.choices) ? raw.choices : [],
     repent: repentOk ? { axis: raw.repent.axis, screen: raw.repent.screen ?? null } : null,
     progress: { ...base.progress, ...(raw.progress ?? {}) },

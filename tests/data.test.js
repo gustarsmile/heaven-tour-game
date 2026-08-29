@@ -109,7 +109,7 @@ function validateTree(t) {
   }
   expect(t.garden.lines.length).toBeGreaterThanOrEqual(1);
   expect(t.read.lines.length).toBeGreaterThanOrEqual(1);
-  expect(t.cases.length).toBeGreaterThanOrEqual(3);
+  expect(t.cases.length).toBeGreaterThanOrEqual(4);
   for (const c of t.cases) {
     for (const key of ['desc', 'question', 'hint', 'reveal']) expect(c[key].length).toBeGreaterThan(0);
     expect(c.options.length).toBe(3);
@@ -160,6 +160,14 @@ describe('flow.json 驗證', () => {
   });
   it('每個畫面資料都有 tagline（遊歷選單一句簡介）', () => {
     for (const s of flow.screens) expect(typeof FILES[s.src].tagline).toBe('string');
+  });
+  it('modes 每個鍵的每個 id 都能對應到 flow.screens，且首站為 prologue', () => {
+    const screenIds = new Set(flow.screens.map((s) => s.id));
+    for (const [, ids] of Object.entries(flow.modes)) {
+      expect(ids.length).toBeGreaterThan(0);
+      for (const id of ids) expect(screenIds.has(id)).toBe(true);
+      expect(ids[0]).toBe('prologue');
+    }
   });
 });
 

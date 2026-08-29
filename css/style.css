@@ -107,7 +107,7 @@ body {
 .hint { color: var(--paper-dim); font-size: 0.9rem; margin: 0 0 12px; }
 .feedback { color: var(--gold); font-size: 0.95rem; margin-top: 12px; }
 
-/* 選項列（名稱＋說明；沿用自舊判官殿命名，現為封面模式選擇按鈕使用） */
+/* 選項列（名稱＋說明；沿用自舊判官站命名，現為封面模式選擇按鈕使用） */
 .opt-name { display: block; color: var(--gold); margin-bottom: 4px; }
 .opt-desc { display: block; font-size: 0.85rem; color: var(--paper-dim); }
 
@@ -128,7 +128,7 @@ body {
 .wu-score { color: var(--gold); font-size: 1.5rem; margin: 12px 0 4px; }
 .wu-detail { margin-bottom: 4px; }
 
-/* ===== 見聞殿（階段2） ===== */
+/* ===== 見聞站（階段2） ===== */
 .visit-box .hall-title { letter-spacing: 0.15em; }
 .watch-panels { margin: 12px 0; }
 .watch-panel {
@@ -377,13 +377,6 @@ body {
   text-indent: 0.5em;
   margin-top: 4px;
 }
-.cover-subtitle {
-  color: var(--vermilion);
-  font-size: 1.1rem;
-  letter-spacing: 0.6em;
-  text-indent: 0.6em;
-  margin: 2px 0 10px;
-}
 .cover-tagline { color: var(--paper-dim); font-size: 0.9rem; margin: 0 0 16px; }
 .cover-btn { text-align: center; }
 .cover-btn .opt-name { margin-bottom: 2px; }
@@ -424,7 +417,7 @@ body {
      會蓋過 48% 的 flex-basis，把圖撐成整框寬、擠掉右側文字。歸零後 48% 才生效。 */
   .cover-art { flex: 0 0 48%; min-width: 0; height: auto; aspect-ratio: auto; border-right: 1px solid var(--gold-dim); }
   .cover-body { flex: 1; min-width: 0; padding: 32px 30px; align-self: center; }
-  .cover-title, .cover-subtitle { text-align: center; }
+  .cover-title { text-align: center; }
 }
 
 /* ===== 大圖檢視（點圖放大，js/ui/lightbox.js） =====

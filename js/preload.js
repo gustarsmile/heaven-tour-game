@@ -1,5 +1,5 @@
 // 美術預載：開場後在背景把整趟旅程的插圖逐張拉進快取，
-// 之後每一殿換頁時圖片即刻顯示，不再「文字先出、圖片後跳」。
+// 之後每一站換頁時圖片即刻顯示，不再「文字先出、圖片後跳」。
 
 export function collectArtFiles(value, out = new Set()) {
   if (typeof value === 'string') {

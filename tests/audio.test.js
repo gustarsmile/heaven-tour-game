@@ -49,25 +49,7 @@ describe('audio 模組', () => {
     a.stopAmbient();
     expect(() => a.stopAmbient()).not.toThrow();
   });
-  it('setScene 切換場景不擲錯，且以新場景參數重建環境音（低通 heaven 620／hell 320）', () => {
-    let ac;
-    class SpyAC extends FakeAC { // 記錄建立的低通節點以驗證場景參數
-      constructor() { super(); ac = this; this.filters = []; }
-      createBiquadFilter() { const n = super.createBiquadFilter(); this.filters.push(n); return n; }
-    }
-    const a = createAudio({ storage: memStorage(), AC: SpyAC });
-    a.startAmbient(); // 預設天堂場景
-    expect(ac.filters.at(-1).frequency.value).toBe(620);
-    expect(() => a.setScene('hell')).not.toThrow();
-    expect(ac.filters.at(-1).frequency.value).toBe(320); // 地府：低通壓暗
-    a.setScene('heaven');
-    expect(ac.filters.at(-1).frequency.value).toBe(620); // 天堂：風聲較清亮
-    const built = ac.filters.length;
-    a.setScene('heaven'); // 同場景重複呼叫為 no-op，不重建
-    expect(ac.filters.length).toBe(built);
-    a.stopAmbient();
-  });
-  it('環境音 12 秒點綴依場景而異：天堂風鈴（sine）／地府鐵鍊（square）', () => {
+  it('環境音 12 秒點綴為天堂風鈴（sine）', () => {
     vi.useFakeTimers();
     try {
       let ac;
@@ -76,13 +58,9 @@ describe('audio 模組', () => {
         createOscillator() { const n = super.createOscillator(); this.oscs.push(n); return n; }
       }
       const a = createAudio({ storage: memStorage(), AC: SpyAC });
-      a.startAmbient(); // 預設天堂場景
+      a.startAmbient();
       vi.advanceTimersByTime(12000);
       expect(ac.oscs.map((o) => o.type)).toEqual(['sine', 'sine', 'sine']); // windChime
-      ac.oscs.length = 0;
-      a.setScene('hell'); // 重建環境音，計時器換掛 clank
-      vi.advanceTimersByTime(12000);
-      expect(ac.oscs.map((o) => o.type)).toEqual(['square', 'square', 'square']); // clank
       a.stopAmbient();
     } finally {
       vi.useRealTimers();

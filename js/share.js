@@ -54,7 +54,7 @@ export function drawShareCard(ctx, { title, wu, motto }, qrImg, bgImg = null) {
   ctx.fillRect(0, 0, CARD_W, CARD_H);
   if (bgImg) {
     drawCoverImage(ctx, bgImg);
-    ctx.fillStyle = 'rgba(255, 253, 246, 0.6)'; // 提亮保文字可讀（底圖為明亮天堂圖）
+    ctx.fillStyle = 'rgba(255, 253, 246, 0.42)'; // 提亮保文字可讀（底圖為明亮天堂圖）
     ctx.fillRect(0, 0, CARD_W, CARD_H);
   } else {
     ctx.fillStyle = C.ink2;

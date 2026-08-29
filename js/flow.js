@@ -31,7 +31,7 @@ async function fetchJSON(path) {
 }
 
 // intro 行陣列 → 純 line 場景（取代階段1的 runIntroLines，消除步進邏輯重複）
-// art：入殿引言沿用該殿主圖，版面與後續階段連貫
+// art：入站引言沿用該站主圖，版面與後續階段連貫
 function linesToScene(lines, art) {
   return {
     id: 'lines',
@@ -65,7 +65,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
   let modeList = flow.screens; // 當前模式的畫面清單
   let currentScreenId = null;
   let localBack = null; // 當前畫面內的一步返回（對話上一句／上一階段）
-  const screenHistory = []; // 走過的殿，供跨殿返回
+  const screenHistory = []; // 走過的站，供跨站返回
 
   const onChoice = (rec) => recordChoice(state, { ...rec, screen: currentScreenId });
   const hooks = { onChoice };
@@ -96,7 +96,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
 
   function setLocalBack(fn) {
     localBack = fn;
-    nav.setBack(currentScreenId === null ? null : goBack);
+    nav.setBack(currentScreenId !== null && (localBack || screenHistory.length > 0) ? goBack : null);
   }
 
   function goBack() {
@@ -193,7 +193,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
       }));
   }
 
-  // 善書冊疊層：不打斷當前殿的進度
+  // 善書冊疊層：不打斷當前站的進度
   function openBookletOverlay() {
     audio.flip();
     const overlay = el('div');
@@ -260,7 +260,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     const scr = modeList.find((s) => s.id === id) ?? flow.screens.find((s) => s.id === id);
     if (!scr) { showCover(); return; }
     currentScreenId = id;
-    resetScreen(state, id); // 重入整殿重新計分，杜絕重複灌分
+    resetScreen(state, id); // 重入整站重新計分，杜絕重複灌分
     state.progress.screen = id;
     save(state, storage);
     nav.setMenu(menuConfig());

@@ -1,33 +1,10 @@
-import { el, artImg, sceneFrame } from './render.js';
+import {
+  el, sceneFrame, appendNext, appendLines, appendTreeVerdicts,
+} from './render.js';
 import { endingKey, endingQuote } from '../engine/finale.js';
 import { finalWu, rawWu, karmaPenalty } from '../state.js';
-import { readTree, treeLevel } from '../engine/tree.js';
+import { treeLevel } from '../engine/tree.js';
 import { GAME_TITLE, GAME_URL } from '../config.js';
-
-function appendNext(box, label, onClick) {
-  const btn = el('button', 'btn btn-next', label);
-  btn.addEventListener('click', onClick);
-  box.appendChild(btn);
-}
-
-function appendLines(box, lines) {
-  for (const l of lines) {
-    if (l.speaker) box.appendChild(el('div', 'speaker', l.speaker));
-    box.appendChild(el('p', 'text', l.text));
-    if (l.img) box.appendChild(artImg(l.img, 'art-figure'));
-  }
-}
-
-function appendVerdicts(box, state, treeData) {
-  const list = el('div', 'tree-verdicts');
-  for (const r of readTree(state, treeData)) {
-    const item = el('div', `tree-verdict verdict-${r.state}`);
-    item.appendChild(el('div', 'verdict-part', `${r.part}・${r.label}`));
-    item.appendChild(el('p', 'verdict-text', r.text));
-    list.appendChild(item);
-  }
-  box.appendChild(list);
-}
 
 export function renderFinalePhase(finale, handlers, root) {
   root.innerHTML = '';
@@ -52,7 +29,7 @@ export function renderFinalePhase(finale, handlers, root) {
     appendLines(box, d.tree.lines);
     box.appendChild(el('div', 'tree-level', `樹況・${level.label}`));
     box.appendChild(el('p', 'text', level.line));
-    appendVerdicts(box, s, finale.treeData);
+    appendTreeVerdicts(box, s, finale.treeData);
     appendNext(box, '聽評 ▸', handlers.onNextPhase);
   } else if (finale.phase === 'ending') {
     const e = d.endings[endingKey(s)];
@@ -63,7 +40,7 @@ export function renderFinalePhase(finale, handlers, root) {
     if (quote) box.appendChild(el('p', 'ending-quote', quote));
     appendNext(box, '領受 ▸', handlers.onNextPhase);
   } else if (finale.phase === 'done') {
-    frame.box.classList.add('finale-end');
+    frame.box.classList.add('finale-end'); // finale-end：無樣式，供 autoplay／測試辨識結局畫面
     const e = d.endings[endingKey(s)];
     box.appendChild(el('div', 'card-title', '此 行 評 語'));
     box.appendChild(el('p', 'ending-title', e.title));

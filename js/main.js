@@ -13,7 +13,7 @@ document.addEventListener('pointerdown', function once() {
   audio.startAmbient(); // 首次手勢後才允許出聲（瀏覽器 autoplay 政策）
 });
 document.addEventListener('click', (e) => {
-  if (e.target.closest('.btn, .testimony-line.clickable')) audio.tick();
+  if (e.target.closest('.btn')) audio.tick();
 });
 
 const mute = el('button', null, audio.isEnabled() ? '音' : '靜');

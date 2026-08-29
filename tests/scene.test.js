@@ -25,20 +25,11 @@ describe('scene player', () => {
     expect(p.current().id).toBe('n1');
     expect(p.advance().id).toBe('n2');
   });
-  it('choose 套用 karma（含場景權重）並前進', () => {
-    const onKarma = vi.fn();
-    const p = createPlayer(scene, { onKarma });
+  it('choose 套用選項並前進', () => {
+    const p = createPlayer(scene);
     p.advance();
     const next = p.choose(0);
-    expect(onKarma).toHaveBeenCalledWith('xin', 1, 2);
     expect(next.id).toBe('n3');
-  });
-  it('無 karma 的選項不呼叫 onKarma', () => {
-    const onKarma = vi.fn();
-    const p = createPlayer(scene, { onKarma });
-    p.advance();
-    p.choose(1);
-    expect(onKarma).not.toHaveBeenCalled();
   });
   it('走到 end 節點 isEnded 為真', () => {
     const p = createPlayer(scene);

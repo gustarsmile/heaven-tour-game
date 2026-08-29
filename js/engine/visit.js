@@ -57,9 +57,6 @@ export function chooseMercy(visit, index) {
   if (visit.mercyReply !== null) return { reply: visit.mercyReply };
   const opt = visit.data.mercy.choices[index];
   if (!opt) throw new Error(`選項不存在：${index}`);
-  if (opt.karma && visit.hooks.onKarma) {
-    visit.hooks.onKarma(opt.karma.axis, opt.karma.delta, 1);
-  }
   if (opt.karma && visit.hooks.onChoice) {
     visit.hooks.onChoice({
       scene: visit.data.id, label: null, text: opt.text,

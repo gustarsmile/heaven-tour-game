@@ -136,6 +136,19 @@ describe('存讀檔', () => {
     expect(r2.choices).toEqual([]);
     expect(r2.repent).toBeNull();
   });
+  it('wuByScreen 損壞型別／內含非數值項目時，deserialize 清成乾淨物件，finalWu 仍為數字', () => {
+    const legacy = JSON.parse(serialize(createState()));
+    legacy.wuByScreen = 'oops';
+    const r = deserialize(JSON.stringify(legacy));
+    expect(r.wuByScreen).toEqual({});
+    expect(typeof finalWu(r)).toBe('number');
+
+    const legacy2 = JSON.parse(serialize(createState()));
+    legacy2.wuByScreen = { gate: 5, donghua: 'oops', bad: NaN };
+    const r2 = deserialize(JSON.stringify(legacy2));
+    expect(r2.wuByScreen).toEqual({ gate: 5 });
+    expect(typeof finalWu(r2)).toBe('number');
+  });
   it('save/load 經 storage 往返，無檔回 null；鍵為 heavenTourSave.v1', () => {
     const st = fakeStorage();
     expect(load(st)).toBeNull();
