@@ -6,6 +6,8 @@
     { "id": "gate", "type": "visit", "src": "gate.json" },
     { "id": "sanqinghe", "type": "visit", "src": "sanqinghe.json" },
     { "id": "donghua", "type": "tree", "src": "donghua.json" },
+    { "id": "nanhua", "type": "visit", "src": "nanhua.json" },
+    { "id": "xihua", "type": "visit", "src": "xihua.json" },
     { "id": "yaochi", "type": "finale", "src": "yaochi.json" }
   ],
   "modes": {
