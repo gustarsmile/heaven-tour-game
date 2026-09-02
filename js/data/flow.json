@@ -10,6 +10,9 @@
     { "id": "xihua", "type": "visit", "src": "xihua.json" },
     { "id": "beihua", "type": "visit", "src": "beihua.json" },
     { "id": "zhonghua", "type": "visit", "src": "zhonghua.json" },
+    { "id": "kongzi", "type": "visit", "src": "kongzi.json" },
+    { "id": "shijia", "type": "visit", "src": "shijia.json" },
+    { "id": "guanyin", "type": "visit", "src": "guanyin.json" },
     { "id": "yaochi", "type": "finale", "src": "yaochi.json" }
   ],
   "modes": {
