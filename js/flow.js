@@ -2,7 +2,7 @@ import { GAME_TITLE, PROLOGUE_ID } from './config.js';
 import {
   createState, recordChoice, creditWu, resetScreen, finalWu, save, load, clearSave,
 } from './state.js';
-import { loadBooklet, addCard } from './booklet.js';
+import { loadBooklet, addCard, clearBooklet } from './booklet.js';
 import { createPlayer } from './engine/scene.js';
 import { createVisit, nextVisitPhase, prevVisitPhase, answerQuiz, chooseMercy, takeBranch, visitScore } from './engine/visit.js';
 import { createTreeScreen, nextTreePhase, prevTreePhase, answerCase, caseIndex, treeScore, treeMax } from './engine/treeScreen.js';
@@ -321,6 +321,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
       },
       onStart: (mode) => {
         clearSave(storage);
+        clearBooklet(storage); // 開新局天音卡歸零；「繼續旅程」不經此處，冊保留
         state = createState(mode);
         buildMode(mode);
         runScreen(modeList[0].id);

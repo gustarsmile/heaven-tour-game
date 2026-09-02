@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { loadBooklet, addCard } from '../js/booklet.js';
+import { loadBooklet, addCard, clearBooklet } from '../js/booklet.js';
 
 function fakeStorage() {
   const data = {};
@@ -24,6 +24,21 @@ describe('善書冊儲存', () => {
     addCard('gate', st);
     st.removeItem('heavenTourSave.v1');
     expect(loadBooklet(st)).toEqual(['gate']);
+  });
+  it('clearBooklet 清空已收卡片', () => {
+    const st = fakeStorage();
+    addCard('gate', st);
+    addCard('donghua', st);
+    clearBooklet(st);
+    expect(loadBooklet(st)).toEqual([]);
+  });
+  it('clearBooklet 於 storage 擲錯不擲錯', () => {
+    const boom = {
+      setItem() { throw new Error('quota'); },
+      getItem() { throw new Error('denied'); },
+      removeItem() { throw new Error('denied'); },
+    };
+    expect(() => clearBooklet(boom)).not.toThrow();
   });
   it('損壞 JSON 或非陣列 → 空陣列', () => {
     const st = fakeStorage();

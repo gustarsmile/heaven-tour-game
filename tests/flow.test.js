@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { startGame } from '../js/flow.js';
 import { createState, save, load, finalWu, rawWu } from '../js/state.js';
 import { endingKey } from '../js/engine/finale.js';
-import { loadBooklet } from '../js/booklet.js';
+import { loadBooklet, addCard } from '../js/booklet.js';
 import { GAME_TITLE } from '../js/config.js';
 
 const modules = import.meta.glob('../js/data/*.json', { eager: true });
@@ -221,7 +221,7 @@ describe('全流程整合（flow manifest）', () => {
     expect(root.textContent).toContain('完整遊歷');
   });
 
-  it('通關收滿天音卡入善書冊，重新開始後冊仍保留', async () => {
+  it('通關收滿天音卡入善書冊；重新開始開新局後冊歸零', async () => {
     const storage = fakeStorage();
     const root = document.createElement('div');
     await startGame({ root, loadJSON, storage });
@@ -230,8 +230,22 @@ describe('全流程整合（flow manifest）', () => {
       .filter((s) => resourceOf(s.id)?.card).map((s) => s.id);
     expect(cardScreens.length).toBe(13);
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
+    // 重新開始 → 封面選模式開新局 → 善書冊歸零（使用者裁決：歸零比較有動力再完成一次）
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
-    expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
+    [...root.querySelectorAll('button')].find((b) => b.textContent.includes('完整遊歷')).click();
+    expect(loadBooklet(storage)).toEqual([]);
+  });
+
+  it('中途離開後「繼續旅程」不清善書冊', async () => {
+    const storage = fakeStorage();
+    const s = createState();
+    s.progress.screen = 'gate';
+    save(s, storage);
+    addCard('sapling', storage);
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON, storage });
+    [...root.querySelectorAll('button')].find((b) => b.textContent.includes('繼續旅程')).click();
+    expect(loadBooklet(storage)).toEqual(['sapling']);
   });
 
   it('scene 站帶 card：場景走完發天音卡並收入善書冊', async () => {

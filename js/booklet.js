@@ -1,6 +1,6 @@
 import { safeStorage } from './state.js';
 
-const BOOKLET_KEY = 'heavenTourBooklet.v1'; // 跨輪保留：重新開始不清除，重玩可補完
+const BOOKLET_KEY = 'heavenTourBooklet.v1'; // 開新局歸零（使用者裁決：歸零比較有動力再完成一次）；續玩保留
 
 export function loadBooklet(storage) {
   try {
@@ -10,6 +10,15 @@ export function loadBooklet(storage) {
     return Array.isArray(arr) ? arr.filter((x) => typeof x === 'string') : [];
   } catch {
     return [];
+  }
+}
+
+export function clearBooklet(storage) {
+  try {
+    const s = safeStorage(storage);
+    if (s) s.removeItem(BOOKLET_KEY);
+  } catch {
+    /* 清除失敗不影響遊玩 */
   }
 }
 
