@@ -254,3 +254,20 @@ describe('scene 站天音卡（引擎支援）', () => {
     expect(() => validateCard({ title: 't', lesson: 'l', speaker: 's', source: { chapter: 1, url: 'x' } })).toThrow();
   });
 });
+
+// ---------- 孝子殿專屬 ----------
+
+describe('孝子殿專屬驗證', () => {
+  it('三段抉擇軸恰為 ren／xin／yi 各一，delta 皆為 [1, 0, -1]，且附天音卡', () => {
+    const xiaozi = FILES['xiaozi.json'];
+    const nodes = xiaozi.nodes.filter((n) => n.type === 'choice');
+    expect(nodes.length).toBe(3);
+    const axes = nodes.map((n) => n.choices.find((c) => c.karma)?.karma.axis);
+    expect([...axes].sort()).toEqual(['ren', 'xin', 'yi']);
+    for (const n of nodes) {
+      expect(n.label.length).toBeGreaterThan(0);
+      expect(n.choices.map((c) => c.karma.delta)).toEqual([1, 0, -1]);
+    }
+    validateCard(xiaozi.card);
+  });
+});
