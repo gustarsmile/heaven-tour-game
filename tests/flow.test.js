@@ -180,6 +180,8 @@ describe('全流程整合（flow manifest）', () => {
     expect(s.wuMax).toBe(max);
     expect(rawWu(s)).toBe(raw);
     expect(root.textContent).toContain(`悟性值 ${max > 0 ? Math.round((raw / max) * 100) : 0}`);
+    expect(flowData.modes.lite).toEqual(['prologue', 'interlude', 'sapling', 'gate', 'donghua', 'beihua', 'yaochi']);
+    expect(root.textContent).toContain(yaochi.endings[endingKey(s)].title);
   });
 
   it('有存檔時封面顯示續玩，繼續從該畫面開始', async () => {

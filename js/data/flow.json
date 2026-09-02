@@ -8,9 +8,11 @@
     { "id": "donghua", "type": "tree", "src": "donghua.json" },
     { "id": "nanhua", "type": "visit", "src": "nanhua.json" },
     { "id": "xihua", "type": "visit", "src": "xihua.json" },
+    { "id": "beihua", "type": "visit", "src": "beihua.json" },
+    { "id": "zhonghua", "type": "visit", "src": "zhonghua.json" },
     { "id": "yaochi", "type": "finale", "src": "yaochi.json" }
   ],
   "modes": {
-    "lite": ["prologue", "interlude", "sapling", "gate", "donghua", "yaochi"]
+    "lite": ["prologue", "interlude", "sapling", "gate", "donghua", "beihua", "yaochi"]
   }
 }
