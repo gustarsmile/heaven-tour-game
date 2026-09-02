@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
-  createVisit, visitPhases, nextVisitPhase, answerQuiz, chooseMercy, takeBranch, visitScore,
+  createVisit, visitPhases, nextVisitPhase, prevVisitPhase, answerQuiz, chooseMercy, takeBranch, visitScore,
 } from '../js/engine/visit.js';
 
 const base = {
@@ -101,6 +101,15 @@ describe('takeBranch 與 visitScore', () => {
   });
   it('無考題站 visitScore 為 0', () => {
     expect(visitScore(createVisit(mercyVisit))).toBe(0);
+  });
+  it('接受支線後：prev 跳過 branch 回 watch，next 亦跳過 branch 直達 closing（不再卡死畫面）', () => {
+    const v = createVisit(branchVisit);
+    nextVisitPhase(v); // → branch
+    takeBranch(v, true);
+    nextVisitPhase(v); // 流程層支線結束後前進 → closing
+    expect(v.phase).toBe('closing');
+    expect(prevVisitPhase(v)).toBe('watch'); // 跳過已走過的 branch
+    expect(nextVisitPhase(v)).toBe('closing'); // 前進同樣跳過，不落在無按鈕畫面
   });
 });
 

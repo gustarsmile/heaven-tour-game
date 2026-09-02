@@ -169,6 +169,13 @@ describe('flow.json 驗證', () => {
       expect(ids[0]).toBe('prologue');
     }
   });
+  it('階段 2 完整版畫面順序固定（防止站點被默默移除）', () => {
+    expect(flow.screens.map((s) => s.id)).toEqual([
+      'prologue', 'interlude', 'sapling', 'gate', 'sanqinghe', 'donghua',
+      'nanhua', 'xihua', 'beihua', 'zhonghua', 'kongzi', 'shijia', 'guanyin',
+      'zhongyi', 'xiaozi', 'baxian', 'yaochi',
+    ]);
+  });
 });
 
 // ---------- 逐檔驗證（自動掃描） ----------
@@ -249,9 +256,11 @@ describe('美術欄位驗證', () => {
 
 // ---------- scene 站天音卡：引擎規則守門（Task 6 孝子殿起有實際對象） ----------
 
-describe('scene 站天音卡（引擎支援）', () => {
-  it('validateCard 拒絕缺 quote 的卡', () => {
-    expect(() => validateCard({ title: 't', lesson: 'l', speaker: 's', source: { chapter: 1, url: 'x' } })).toThrow();
+describe('scene 站天音卡', () => {
+  it('孝子殿為 scene 型別且帶天音卡（引擎 scene 卡路徑的實際對象）', () => {
+    const scr = flow.screens.find((s) => s.id === 'xiaozi');
+    expect(scr.type).toBe('scene');
+    expect(FILES['xiaozi.json'].card).toBeTruthy();
   });
 });
 

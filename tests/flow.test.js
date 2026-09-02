@@ -122,6 +122,7 @@ describe('全流程整合（flow manifest）', () => {
     const s = load(storage);
     expect(rawWu(s)).toBe(raw);
     expect(s.wuMax).toBe(max);
+    expect(s.wuMax).toBe(80);
     const wu = max > 0 ? Math.round((raw / max) * 100) : 0;
     expect(finalWu(s)).toBe(wu);
     expect(finalWu(s)).toBe(100);
@@ -178,6 +179,7 @@ describe('全流程整合（flow manifest）', () => {
     const s = load(storage);
     expect(s.mode).toBe('lite');
     expect(s.wuMax).toBe(max);
+    expect(s.wuMax).toBe(30);
     expect(rawWu(s)).toBe(raw);
     expect(root.textContent).toContain(`悟性值 ${max > 0 ? Math.round((raw / max) * 100) : 0}`);
     expect(flowData.modes.lite).toEqual(['prologue', 'interlude', 'sapling', 'gate', 'donghua', 'beihua', 'yaochi']);
@@ -226,7 +228,7 @@ describe('全流程整合（flow manifest）', () => {
     autoplay(root, storage, { acceptBranch: true });
     const cardScreens = flowData.screens
       .filter((s) => resourceOf(s.id)?.card).map((s) => s.id);
-    expect(cardScreens.length).toBeGreaterThanOrEqual(2);
+    expect(cardScreens.length).toBe(13);
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
@@ -324,7 +326,7 @@ describe('八仙支線功德', () => {
     const root = document.createElement('div');
     await startGame({ root, loadJSON: miniLoad, storage });
     autoplay(root, storage, { acceptBranch: false });
-    expect(load(storage).wuByScreen.baxian ?? 0).toBe(0);
+    expect(load(storage).wuByScreen.baxian).toBe(0);
   });
 });
 

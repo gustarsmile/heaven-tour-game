@@ -22,9 +22,15 @@ export function createVisit(data, hooks = {}) {
   };
 }
 
+// 前進至下一階段；支線已走過（接受）時跳過 branch，避免落在無按鈕的空畫面
 export function nextVisitPhase(visit) {
-  const i = visit.phases.indexOf(visit.phase);
-  visit.phase = visit.phases[Math.min(i + 1, visit.phases.length - 1)];
+  let i = visit.phases.indexOf(visit.phase);
+  while (i < visit.phases.length - 1) {
+    i += 1;
+    if (visit.phases[i] === 'branch' && visit.branchTaken === true) continue;
+    visit.phase = visit.phases[i];
+    return visit.phase;
+  }
   return visit.phase;
 }
 
