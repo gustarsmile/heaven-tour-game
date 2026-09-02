@@ -4,6 +4,7 @@
     { "id": "interlude", "type": "scene", "src": "interlude.json" },
     { "id": "sapling", "type": "tree", "src": "sapling.json" },
     { "id": "gate", "type": "visit", "src": "gate.json" },
+    { "id": "sanqinghe", "type": "visit", "src": "sanqinghe.json" },
     { "id": "donghua", "type": "tree", "src": "donghua.json" },
     { "id": "yaochi", "type": "finale", "src": "yaochi.json" }
   ],
