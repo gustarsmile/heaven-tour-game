@@ -299,3 +299,44 @@ describe('場景圖軌跡（節點級換景）', () => {
     expect(art()).toBe('assets/art/interlude-night.webp');
   });
 });
+
+describe('八仙支線功德', () => {
+  const miniFlow = {
+    screens: [
+      { id: 'prologue', type: 'scene', src: 'prologue.json' },
+      { id: 'baxian', type: 'visit', src: 'baxian.json' },
+      { id: 'yaochi', type: 'finale', src: 'yaochi.json' },
+    ],
+    modes: {},
+  };
+  const miniLoad = async (p) =>
+    p === 'js/data/flow.json' ? structuredClone(miniFlow) : loadJSON(p);
+
+  it('接受並看完戲法 → 隱藏功德 +10 入 baxian', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON: miniLoad, storage });
+    autoplay(root, storage, { acceptBranch: true });
+    expect(load(storage).wuByScreen.baxian).toBe(10);
+  });
+  it('婉拒支線 → baxian 0 分', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON: miniLoad, storage });
+    autoplay(root, storage, { acceptBranch: false });
+    expect(load(storage).wuByScreen.baxian ?? 0).toBe(0);
+  });
+});
+
+describe('五軸覆蓋（完整版整合守門）', () => {
+  it('完美通關後，五軸每一軸都至少有兩筆選擇紀錄', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON, storage });
+    autoplay(root, storage, { acceptBranch: true });
+    const s = load(storage);
+    for (const axis of ['ren', 'yi', 'li', 'zhi', 'xin']) {
+      expect(s.choices.filter((c) => c.axis === axis).length, axis).toBeGreaterThanOrEqual(2);
+    }
+  });
+});
