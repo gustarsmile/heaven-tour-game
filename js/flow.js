@@ -273,7 +273,11 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     const data = resources[scr.id];
 
     if (scr.type === 'scene') {
-      runScene(data, goNext);
+      runScene(data, data.card ? () => {
+        audio.flip();
+        setLocalBack(null);
+        renderCard(data.card, collectCard, root);
+      } : goNext);
     } else if (scr.type === 'visit') {
       runScene(linesToScene(data.intro, data.art?.scene), () =>
         runVisit(data, () => {

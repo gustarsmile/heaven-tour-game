@@ -217,16 +217,47 @@ describe('全流程整合（flow manifest）', () => {
     expect(root.textContent).toContain('完整遊歷');
   });
 
-  it('通關收滿因果卡入善書冊，重新開始後冊仍保留', async () => {
+  it('通關收滿天音卡入善書冊，重新開始後冊仍保留', async () => {
     const storage = fakeStorage();
     const root = document.createElement('div');
     await startGame({ root, loadJSON, storage });
     autoplay(root, storage, { acceptBranch: true });
     const cardScreens = flowData.screens
       .filter((s) => resourceOf(s.id)?.card).map((s) => s.id);
+    expect(cardScreens.length).toBeGreaterThanOrEqual(2);
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
+  });
+
+  it('scene 站帶 card：場景走完發天音卡並收入善書冊', async () => {
+    const miniFlow = {
+      screens: [
+        { id: 'prologue', type: 'scene', src: 'prologue.json' },
+        { id: 'xiaozi-mini', type: 'scene', src: 'xiaozi-mini.json' },
+        { id: 'yaochi', type: 'finale', src: 'yaochi.json' },
+      ],
+      modes: {},
+    };
+    const miniCard = {
+      title: '測試卡', lesson: '白話。', quote: '原文。', speaker: '測試',
+      source: { chapter: 33, url: 'https://www.taolibrary.com/category/category48/c48001b/35.htm' },
+    };
+    const miniScene = {
+      id: 'xiaozi-mini', art: 'xiaozi-scene.webp', start: 'a',
+      nodes: [{ id: 'a', type: 'line', speaker: '旁白', text: 'x', next: 'fin' }, { id: 'fin', type: 'end' }],
+      menuTitle: '迷你', tagline: 't', card: miniCard,
+    };
+    const miniLoad = async (p) => {
+      if (p === 'js/data/flow.json') return structuredClone(miniFlow);
+      if (p === 'js/data/xiaozi-mini.json') return structuredClone(miniScene);
+      return loadJSON(p);
+    };
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON: miniLoad, storage });
+    autoplay(root, storage);
+    expect(loadBooklet(storage)).toContain('xiaozi-mini');
   });
 });
 

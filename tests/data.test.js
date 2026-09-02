@@ -176,7 +176,10 @@ describe('flow.json 驗證', () => {
 describe('內容資料驗證', () => {
   for (const scr of flow.screens) {
     if (scr.type === 'scene') {
-      it(`${scr.src}：場景結構正確`, () => validateScene(FILES[scr.src]));
+      it(`${scr.src}：場景結構正確`, () => {
+        validateScene(FILES[scr.src]);
+        if (FILES[scr.src].card) validateCard(FILES[scr.src].card);
+      });
     } else if (scr.type === 'visit') {
       it(`${scr.src}：見聞殿結構正確`, () => validateVisit(FILES[scr.src]));
     } else if (scr.type === 'tree') {
@@ -241,5 +244,13 @@ describe('美術欄位驗證', () => {
     Object.values(FILES).forEach(walk);
     expect(seen.length).toBeGreaterThan(0);
     seen.forEach(expectArt);
+  });
+});
+
+// ---------- scene 站天音卡：引擎規則守門（Task 6 孝子殿起有實際對象） ----------
+
+describe('scene 站天音卡（引擎支援）', () => {
+  it('validateCard 拒絕缺 quote 的卡', () => {
+    expect(() => validateCard({ title: 't', lesson: 'l', speaker: 's', source: { chapter: 1, url: 'x' } })).toThrow();
   });
 });
