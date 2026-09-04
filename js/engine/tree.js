@@ -34,6 +34,13 @@ export function treeLevel(state, levels) {
   return hit;
 }
 
+// 蓮台分級（悟性的介面語言「漸亮／漸大的蓮台」）：tiers 依 min 遞增，取最後一個 wu ≥ min 者
+export function lotusTier(wu, tiers) {
+  let hit = tiers[0];
+  for (const t of tiers) if (wu >= t.min) hit = t;
+  return hit;
+}
+
 // 序章樹苗葉片數＝序章善選數（微差，不說明）
 export function saplingLeaves(state) {
   return state.choices.filter((c) => c.screen === PROLOGUE_ID && c.delta > 0).length;

@@ -3,8 +3,8 @@ import { existsSync, statSync, readdirSync } from 'node:fs';
 import { ART_MANIFEST } from '../scripts/art-manifest.mjs';
 
 describe('美術資產', () => {
-  it('階段 2 清單 30 張齊備（占位圖亦可，量產後以正式圖覆蓋）', () => {
-    expect(ART_MANIFEST.length).toBe(30);
+  it('階段 3 清單 32 張齊備（占位圖亦可，量產後以正式圖覆蓋）', () => {
+    expect(ART_MANIFEST.length).toBe(32);
     for (const f of ART_MANIFEST) expect(existsSync(`assets/art/${f}`), f).toBe(true);
   });
   it('總體積在 6MB 預算內（手機掃碼即玩）', () => {
