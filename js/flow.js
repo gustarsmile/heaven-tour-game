@@ -242,7 +242,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
   }
 
   function runFinale(data) {
-    const finale = createFinale(data, state, treeData);
+    const finale = createFinale(data, state, treeData, screenTitles());
     const step = () => {
       setLocalBack(finale.phase !== finale.phases[0]
         ? () => { prevFinalePhase(finale); step(); }
@@ -250,7 +250,14 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
       renderFinalePhase(finale, handlers, root);
     };
     const handlers = {
-      onNextPhase: () => { nextFinalePhase(finale); step(); },
+      onNextPhase: () => {
+        nextFinalePhase(finale);
+        if (finale.phase === 'origin' && !state.progress.originUnlocked) {
+          state.progress.originUnlocked = true; // 稱號公布後「我的樹」解鎖（設計 §3.6）
+          save(state, storage);
+        }
+        step();
+      },
       onShare: async () => {
         const ending = data.endings[endingKey(state)];
         const [qr, bg] = await Promise.all([

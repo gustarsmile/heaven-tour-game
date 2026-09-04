@@ -13,7 +13,7 @@ export function createState(mode = DEFAULT_MODE) {
     wuByScreen: {},
     choices: [],
     repent: null, // 三官殿懺悔補過：{ axis, screen }，限一次
-    progress: { screen: PROLOGUE_ID },
+    progress: { screen: PROLOGUE_ID, originUnlocked: false }, // originUnlocked：瑤池「樹的來歷」看過後，善書冊「我的樹」頁籤解鎖
   };
 }
 

@@ -135,9 +135,13 @@ function validateTree(t) {
 function validateFinale(f) {
   expect(f.title.length).toBeGreaterThan(0);
   expect(f.intro.length).toBeGreaterThanOrEqual(1);
-  expect(f.wuReveal.lines.length).toBeGreaterThanOrEqual(1);
-  expect(f.wuReveal.note.length).toBeGreaterThan(0);
+  for (const l of f.intro) if (l.art) expectArt(l.art); // 回程南天門換景
+  expect(f.award.lines.length).toBeGreaterThanOrEqual(1);
+  expect(f.award.note.length).toBeGreaterThan(0);
   expect(f.tree.lines.length).toBeGreaterThanOrEqual(1);
+  expect(f.origin.lines.length).toBeGreaterThanOrEqual(1);
+  expect(f.origin.note.length).toBeGreaterThan(0);
+  expect(f.done.lines.length).toBeGreaterThanOrEqual(1);
   const keys = ['highBad', 'highGood', 'lowBad', 'lowGood'];
   expect(Object.keys(f.endings).sort()).toEqual(keys);
   for (const k of keys) {
@@ -279,6 +283,10 @@ describe('瑤池結算專屬驗證', () => {
   });
   it('結算出處為第三六回（/38.htm）', () => {
     expect(FILES['yaochi.json'].source.url).toBe('https://www.taolibrary.com/category/category48/c48001b/38.htm');
+  });
+  it('回程再過南天門：intro 前段換景南天門、後段回到瑤池', () => {
+    const arts = FILES['yaochi.json'].intro.filter((l) => l.art).map((l) => l.art);
+    expect(arts).toEqual(['gate-scene.webp', 'yaochi-scene.webp']);
   });
 });
 

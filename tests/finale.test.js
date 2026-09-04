@@ -37,14 +37,16 @@ describe('四象限結局判定（悟性 × 樹況）', () => {
 });
 
 describe('結算階段機', () => {
-  it('wu→tree→ending→done 到底停住；prev 可回退且首階段停住；treeData 掛在 finale 上', () => {
-    const f = createFinale({}, createState(), treeData);
-    expect(f.phase).toBe('wu');
+  it('award→tree→ending→origin→done 到底停住；prev 可回退且首階段停住；treeData／titles 掛在 finale 上', () => {
+    const f = createFinale({}, createState(), treeData, { gate: '南天門' });
+    expect(f.phase).toBe('award');
     expect(f.treeData).toBe(treeData);
-    for (const expected of ['tree', 'ending', 'done', 'done']) expect(nextFinalePhase(f)).toBe(expected);
-    expect(prevFinalePhase(f)).toBe('ending');
+    expect(f.titles).toEqual({ gate: '南天門' });
+    for (const expected of ['tree', 'ending', 'origin', 'done', 'done']) expect(nextFinalePhase(f)).toBe(expected);
+    expect(prevFinalePhase(f)).toBe('origin');
     const g = createFinale({}, createState(), treeData);
-    expect(prevFinalePhase(g)).toBe('wu');
+    expect(prevFinalePhase(g)).toBe('award');
+    expect(g.titles).toEqual({});
   });
 });
 

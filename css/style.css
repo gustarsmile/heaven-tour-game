@@ -277,6 +277,17 @@ body {
 .review-box .hall-title { letter-spacing: 0.15em; }
 .stage-name { text-align: center; color: var(--gold); letter-spacing: 0.3em; margin: 8px 0 10px; }
 
+/* 蓮台（悟性的介面語言：依分級放大的光暈） */
+.lotus { display: flex; flex-direction: column; align-items: center; margin: 10px 0 4px; }
+.lotus-bloom {
+  width: calc(120px * var(--lotus-scale, 1));
+  height: calc(120px * var(--lotus-scale, 1));
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #fff6d8 0%, #f0c96a 45%, rgba(168, 67, 42, 0.55) 100%);
+  box-shadow: 0 0 calc(28px * var(--lotus-scale, 1)) rgba(240, 201, 106, 0.85);
+}
+.lotus-tier { color: var(--gold); letter-spacing: 0.3em; margin-top: 8px; }
+
 /* ===== 固定導覽：左上返回＋選單、右上音效 ===== */
 #nav-bar {
   position: fixed;

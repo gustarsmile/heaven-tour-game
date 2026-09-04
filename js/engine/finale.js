@@ -2,11 +2,12 @@ import { WU_THRESHOLD, PROLOGUE_ID } from '../config.js';
 import { finalWu } from '../state.js';
 import { treeVerdict } from './tree.js';
 
-// 瑤池結算（階段 1 簡易版）：悟性公布 → 看樹 → 評語 → 稱號卡
-const PHASES = ['wu', 'tree', 'ending', 'done'];
+// 瑤池結算（設計 §3.3 ★④、§3.5、§3.6）：老母頒賞（悟性→蓮台）→ 看樹 → 稱號評語 → 樹的來歷 → 結尾
+const PHASES = ['award', 'tree', 'ending', 'origin', 'done'];
 
-export function createFinale(data, state, treeData) {
-  return { data, state, treeData, phases: [...PHASES], phase: 'wu' };
+// titles：站名表（choice.screen → 站名），樹的來歷用
+export function createFinale(data, state, treeData, titles = {}) {
+  return { data, state, treeData, titles, phases: [...PHASES], phase: 'award' };
 }
 
 export function nextFinalePhase(finale) {

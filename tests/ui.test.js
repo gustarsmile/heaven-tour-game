@@ -240,13 +240,39 @@ describe('finaleView', () => {
     recordChoice(s, { screen: 'prologue', scene: 'prologue', label: '晚上・上週的承諾', text: '「我臨時有事。」——其實只是不想去', axis: 'xin', delta: -1, weight: 2 });
     return s;
   }
-  it('wu 階段：悟性值與扣分明細', () => {
+  it('award 階段：老母頒賞、蓮台依悟性分級（80 → 蓮台盛開、scale 0.95）、悟性值與扣分明細、主圖蓮台', () => {
     const root = document.createElement('div');
     const f = createFinale(yaochi, readyState(), treeData);
     renderFinalePhase(f, { onNextPhase: vi.fn() }, root);
+    expect(root.textContent).toContain(yaochi.award.lines[0].text);
     expect(root.textContent).toContain('悟性值 80');
     expect(root.textContent).toContain('心性有虧扣 8 分');
-    expect(root.querySelector('.scene-art img').getAttribute('src')).toBe('assets/art/yaochi-scene.webp');
+    expect(root.querySelector('.lotus').dataset.tier).toBe('蓮台盛開');
+    expect(root.querySelector('.lotus-bloom').dataset.scale).toBe('0.95');
+    expect(root.querySelector('.lotus-tier').textContent).toBe('蓮台・蓮台盛開');
+    expect(root.querySelector('.scene-art img').getAttribute('src')).toBe('assets/art/interlude-lotus.webp');
+    expect(root.querySelector('.btn-next').textContent).toContain('看樹');
+  });
+  it('ending 階段鈕引向樹的來歷', () => {
+    const root = document.createElement('div');
+    const f = createFinale(yaochi, readyState(), treeData);
+    f.phase = 'ending';
+    renderFinalePhase(f, { onNextPhase: vi.fn() }, root);
+    expect(root.querySelector('.btn-next').textContent).toContain('怎麼長成');
+  });
+  it('origin 階段：樹的來歷總覽（五部位、序章那一筆用 label）、附註、主圖樹況、鈕「領受」', () => {
+    const root = document.createElement('div');
+    const f = createFinale(yaochi, readyState(), treeData, { prologue: '序章・陽間一日' });
+    f.phase = 'origin';
+    renderFinalePhase(f, { onNextPhase: vi.fn() }, root);
+    expect(root.textContent).toContain('樹 的 來 歷');
+    expect(root.textContent).toContain(yaochi.origin.lines[0].text);
+    expect(root.textContent).toContain(yaochi.origin.note);
+    expect(root.querySelectorAll('.origin-axis').length).toBe(5);
+    expect(root.querySelectorAll('.origin-row').length).toBe(1);
+    expect(root.querySelector('.origin-where').textContent).toBe('晚上・上週的承諾');
+    expect(root.querySelector('.scene-art img').getAttribute('src')).toBe('assets/art/tree-2.webp');
+    expect(root.querySelector('.btn-next').textContent).toContain('領受');
   });
   it('tree 階段：主圖為樹況圖、等級標籤、五段評語', () => {
     const root = document.createElement('div');
@@ -274,6 +300,7 @@ describe('finaleView', () => {
     expect(root.querySelector('.finale-end')).not.toBeNull();
     expect(root.textContent).toContain('悟性值 80');
     expect(root.textContent).toContain('稀疏');
+    expect(root.textContent).toContain(yaochi.done.lines[0].text);
     expect(root.querySelector('.card-source').textContent).toContain('第三六回');
     const btns = [...root.querySelectorAll('button')];
     btns.find((b) => b.textContent.includes('分享卡')).click();

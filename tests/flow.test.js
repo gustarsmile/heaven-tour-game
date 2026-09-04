@@ -440,3 +440,16 @@ describe('陰陽界結算（完整版整合）', () => {
     expect(load(storage).wuByScreen.yinyang).toBe(10);
   });
 });
+
+describe('瑤池：樹的來歷解鎖旗標', () => {
+  it('旅途中 originUnlocked 為 false；走到瑤池「樹的來歷」後為 true 並存檔', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON, storage });
+    root.querySelector('.btn-next').click(); // 封面「完整遊歷」
+    expect(load(storage).progress.originUnlocked).toBe(false);
+    autoplay(root, storage, { acceptBranch: true });
+    expect(load(storage).progress.originUnlocked).toBe(true);
+    expect(root.querySelector('.finale-end')).not.toBeNull();
+  });
+});

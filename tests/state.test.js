@@ -24,6 +24,7 @@ describe('state 基本結構', () => {
     expect(s.progress.screen).toBe('prologue');
     expect(s.mode).toBe('full');
     expect(s.wuMax).toBe(0);
+    expect(s.progress.originUnlocked).toBe(false);
   });
   it('五常五軸鍵名與標籤固定', () => {
     expect(AXES).toEqual(['ren', 'yi', 'li', 'zhi', 'xin']);
@@ -127,9 +128,11 @@ describe('存讀檔', () => {
     const legacy = JSON.parse(serialize(createState()));
     delete legacy.choices;
     delete legacy.repent;
+    delete legacy.progress.originUnlocked;
     const r = deserialize(JSON.stringify(legacy));
     expect(r.choices).toEqual([]);
     expect(r.repent).toBeNull();
+    expect(r.progress.originUnlocked).toBe(false);
     legacy.choices = 'oops';
     legacy.repent = 'oops';
     const r2 = deserialize(JSON.stringify(legacy));

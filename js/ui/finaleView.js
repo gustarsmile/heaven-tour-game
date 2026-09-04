@@ -3,27 +3,51 @@ import {
 } from './render.js';
 import { endingKey, endingQuote } from '../engine/finale.js';
 import { finalWu, rawWu, karmaPenalty } from '../state.js';
-import { treeLevel } from '../engine/tree.js';
+import { treeLevel, lotusTier } from '../engine/tree.js';
+import { treeOrigin } from '../engine/origin.js';
+import { appendTreeOrigin } from './originView.js';
 import { GAME_TITLE, GAME_URL } from '../config.js';
+
+const LOTUS_ART = 'interlude-lotus.webp'; // 載你一路來的那一朵蓮台（過場圖）
+
+// 主圖：頒賞＝蓮台；看樹／來歷／結尾＝你的樹；稱號評語＝瑤池殿景
+function artFor(finale, level) {
+  if (finale.phase === 'award') return LOTUS_ART;
+  if (['tree', 'origin', 'done'].includes(finale.phase)) return level.art;
+  return finale.data.art?.scene;
+}
+
+// 蓮台依悟性增大（設計 §3.3 ★④）：分級文字＋依 scale 放大的光暈
+function appendLotus(box, wu, tiers) {
+  const tier = lotusTier(wu, tiers);
+  const lotus = el('div', 'lotus');
+  lotus.dataset.tier = tier.label;
+  const bloom = el('div', 'lotus-bloom');
+  bloom.dataset.scale = String(tier.scale);
+  bloom.style.setProperty('--lotus-scale', String(tier.scale));
+  lotus.appendChild(bloom);
+  lotus.appendChild(el('div', 'lotus-tier', `蓮台・${tier.label}`));
+  box.appendChild(lotus);
+}
 
 export function renderFinalePhase(finale, handlers, root) {
   root.innerHTML = '';
   const d = finale.data;
   const s = finale.state;
   const level = treeLevel(s, finale.treeData.levels);
-  // 看樹與結尾相位以「你的樹」為主圖，其餘相位為瑤池殿景
-  const showTree = finale.phase === 'tree' || finale.phase === 'done';
-  const frame = sceneFrame('scene-box finale-box', showTree ? level.art : d.art?.scene);
+  const frame = sceneFrame('scene-box finale-box', artFor(finale, level));
   const box = frame.body;
   box.appendChild(el('div', 'hall-title', d.title));
 
-  if (finale.phase === 'wu') {
-    appendLines(box, d.wuReveal.lines);
-    box.appendChild(el('p', 'wu-score', `悟性值 ${finalWu(s)} ／ 100`));
+  if (finale.phase === 'award') {
+    appendLines(box, d.award.lines);
+    const wu = finalWu(s);
+    appendLotus(box, wu, finale.treeData.lotus.tiers);
+    box.appendChild(el('p', 'wu-score', `悟性值 ${wu} ／ 100`));
     const pen = karmaPenalty(s);
     const detail = `答題修行 ${rawWu(s)}／${s.wuMax} 分${pen > 0 ? `，心性有虧扣 ${pen} 分` : '，心性無虧'}`;
     box.appendChild(el('p', 'hint wu-detail', detail));
-    box.appendChild(el('p', 'hint', d.wuReveal.note));
+    box.appendChild(el('p', 'hint', d.award.note));
     appendNext(box, '看樹 ▸', handlers.onNextPhase);
   } else if (finale.phase === 'tree') {
     appendLines(box, d.tree.lines);
@@ -38,6 +62,12 @@ export function renderFinalePhase(finale, handlers, root) {
     appendLines(box, e.comment);
     const quote = endingQuote(e, s);
     if (quote) box.appendChild(el('p', 'ending-quote', quote));
+    appendNext(box, '這棵樹是怎麼長成的？ ▸', handlers.onNextPhase);
+  } else if (finale.phase === 'origin') {
+    box.appendChild(el('div', 'card-title', '樹 的 來 歷'));
+    appendLines(box, d.origin.lines);
+    appendTreeOrigin(box, treeOrigin(s, finale.treeData, finale.titles));
+    box.appendChild(el('p', 'hint', d.origin.note));
     appendNext(box, '領受 ▸', handlers.onNextPhase);
   } else if (finale.phase === 'done') {
     frame.box.classList.add('finale-end'); // finale-end：無樣式，供 autoplay／測試辨識結局畫面
@@ -47,6 +77,7 @@ export function renderFinalePhase(finale, handlers, root) {
     box.appendChild(el('p', 'wu-score', `悟性值 ${finalWu(s)} ／ 100`));
     box.appendChild(el('div', 'tree-level', `樹況・${level.label}`));
     box.appendChild(el('p', 'card-lesson', `「${e.motto}」`));
+    appendLines(box, d.done.lines);
     if (d.source) {
       const a = el('a', 'card-source', `結算取材：${d.source.label}`);
       a.href = d.source.url;
