@@ -21,6 +21,6 @@
     { "id": "yaochi", "type": "finale", "src": "yaochi.json" }
   ],
   "modes": {
-    "lite": ["prologue", "interlude", "sapling", "gate", "donghua", "beihua", "yaochi"]
+    "lite": ["prologue", "interlude", "sapling", "gate", "donghua", "beihua", "sanguan", "yinyang", "yaochi"]
   }
 }

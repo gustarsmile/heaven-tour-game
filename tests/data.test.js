@@ -358,3 +358,13 @@ describe('陰陽界專屬驗證', () => {
     expect(y.guests.map((g) => g.quiz.answer)).toEqual([1, 0, 2]); // 三題答案位置錯開
   });
 });
+
+// ---------- 精簡版站序 ----------
+
+describe('精簡版站序（規格 §二 七站）', () => {
+  it('序章三畫面→南天門→東華→北華→三官殿→陰陽界→瑤池', () => {
+    expect(flow.modes.lite).toEqual([
+      'prologue', 'interlude', 'sapling', 'gate', 'donghua', 'beihua', 'sanguan', 'yinyang', 'yaochi',
+    ]);
+  });
+});

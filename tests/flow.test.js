@@ -182,11 +182,27 @@ describe('全流程整合（flow manifest）', () => {
     const s = load(storage);
     expect(s.mode).toBe('lite');
     expect(s.wuMax).toBe(max);
-    expect(s.wuMax).toBe(30);
+    expect(s.wuMax).toBe(45);
     expect(rawWu(s)).toBe(raw);
     expect(root.textContent).toContain(`悟性值 ${max > 0 ? Math.round((raw / max) * 100) : 0}`);
-    expect(flowData.modes.lite).toEqual(['prologue', 'interlude', 'sapling', 'gate', 'donghua', 'beihua', 'yaochi']);
+    expect(flowData.modes.lite).toEqual([
+      'prologue', 'interlude', 'sapling', 'gate', 'donghua', 'beihua', 'sanguan', 'yinyang', 'yaochi',
+    ]);
+    expect(s.wuByScreen.yinyang).toBe(15);
+    expect(s.repent).toBeNull(); // 全善無傷軸
     expect(root.textContent).toContain(yaochi.endings[endingKey(s)].title);
+  });
+
+  it('精簡版惡向：三官殿仍可補過一軸（水官此時已無可補之站）', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON, storage });
+    [...root.querySelectorAll('button')].find((b) => b.textContent.includes('精簡速覽')).click();
+    autoplay(root, storage, { acceptBranch: true, evil: true });
+    const s = load(storage);
+    expect(s.mode).toBe('lite');
+    expect(s.repent).toEqual({ axis: 'xin', screen: 'sanguan' });
+    expect(finalWu(s)).toBeLessThan(70);
   });
 
   it('有存檔時封面顯示續玩，繼續從該畫面開始', async () => {
