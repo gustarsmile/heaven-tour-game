@@ -1,14 +1,81 @@
 import { el, sceneFrame, appendNext, appendLines, appendTreeVerdicts } from './render.js';
 import { caseIndex } from '../engine/treeScreen.js';
-import { saplingLeaves, treeLevel } from '../engine/tree.js';
+import { saplingLeaves, treeLevel, readTree, AXIS_PARTS } from '../engine/tree.js';
+import { repentOptions } from '../engine/judge.js';
+import { AXIS_LABELS } from '../state.js';
 
-// 主圖：案例階段＝該案例樹；look＝樹苗；read＝目前樹況；其餘＝站景
+// 主圖：案例階段＝該案例樹；look＝樹苗；read／天官／地官＝目前樹況（攤牌）；其餘＝站景
 function artFor(t, state, treeData) {
   const i = caseIndex(t);
   if (i !== null) return t.data.cases[i].art;
   if (t.phase === 'look') return treeData.sapling.art;
-  if (t.phase === 'read') return treeLevel(state, treeData.levels).art;
+  if (['read', 'tianguan', 'diguan'].includes(t.phase)) return treeLevel(state, treeData.levels).art;
   return t.data.art?.scene;
+}
+
+// 天官賜福：攤開樹況，唸出佳軸
+function renderTianguan(box, d, state, treeData, handlers) {
+  appendLines(box, d.tianguan.lines);
+  box.appendChild(el('div', 'tree-level', `樹況・${treeLevel(state, treeData.levels).label}`));
+  const good = readTree(state, treeData).filter((r) => r.state === 'good');
+  if (good.length) {
+    box.appendChild(el('p', 'text', d.tianguan.goodLead));
+    appendTreeVerdicts(box, state, treeData, (r) => r.state === 'good');
+  } else {
+    box.appendChild(el('p', 'text', d.tianguan.noneLine));
+  }
+  box.appendChild(el('p', 'text', d.tianguan.closing));
+  appendNext(box, '地官赦罪 ▸', handlers.onNextPhase);
+}
+
+// 地官赦罪：唸出傷軸，玩家挑一軸懺悔補過（+1，限一次）
+function renderDiguan(box, d, state, treeData, handlers) {
+  appendLines(box, d.diguan.lines);
+  if (state.repent) {
+    const r = readTree(state, treeData).find((x) => x.axis === state.repent.axis);
+    box.appendChild(el('p', 'text', d.diguan.reply.replaceAll('{part}', r.part).replaceAll('{label}', r.label)));
+    appendTreeVerdicts(box, state, treeData, (x) => x.axis === state.repent.axis);
+    appendNext(box, '水官解厄 ▸', handlers.onNextPhase);
+    return;
+  }
+  const opts = repentOptions(state, treeData);
+  if (!opts.length) {
+    box.appendChild(el('p', 'text', d.diguan.noneLine));
+    appendNext(box, '水官解厄 ▸', handlers.onNextPhase);
+    return;
+  }
+  box.appendChild(el('p', 'text', d.diguan.badLead));
+  appendTreeVerdicts(box, state, treeData, (r) => r.state === 'bad');
+  box.appendChild(el('p', 'text', d.diguan.prompt));
+  const list = el('div', 'choices');
+  list.dataset.kind = 'repent';
+  for (const o of opts) {
+    const label = o.worstText ? `${o.part}・${o.label}——${o.worstText}` : `${o.part}・${o.label}`;
+    const btn = el('button', 'btn btn-choice', label);
+    btn.dataset.axis = o.axis;
+    btn.addEventListener('click', () => handlers.onRepent(o.axis));
+    list.appendChild(btn);
+  }
+  box.appendChild(list);
+  box.appendChild(el('p', 'hint', d.diguan.skipHint));
+}
+
+// 水官解厄：提示往後還能補的站
+function renderShuiguan(box, d, t, handlers) {
+  appendLines(box, d.shuiguan.lines);
+  if (t.amends?.length) {
+    box.appendChild(el('p', 'text', d.shuiguan.remainLead));
+    const ul = el('ul', 'amend-list');
+    for (const a of t.amends) {
+      const parts = a.axes.map((x) => `${AXIS_PARTS[x]}・${AXIS_LABELS[x]}`).join('、');
+      ul.appendChild(el('li', null, `${a.title}——${parts}`));
+    }
+    box.appendChild(ul);
+  } else {
+    box.appendChild(el('p', 'text', d.shuiguan.noneLine));
+  }
+  box.appendChild(el('p', 'text', d.shuiguan.closing));
+  appendNext(box, '赴宴 ▸', handlers.onNextPhase);
 }
 
 export function renderTreePhase(t, state, treeData, handlers, root, message = '') {
@@ -53,6 +120,12 @@ export function renderTreePhase(t, state, treeData, handlers, root, message = ''
     appendLines(box, d.read.lines);
     appendTreeVerdicts(box, state, treeData);
     appendNext(box, '繼續 ▸', handlers.onNextPhase);
+  } else if (t.phase === 'tianguan') {
+    renderTianguan(box, d, state, treeData, handlers);
+  } else if (t.phase === 'diguan') {
+    renderDiguan(box, d, state, treeData, handlers);
+  } else if (t.phase === 'shuiguan') {
+    renderShuiguan(box, d, t, handlers);
   } else if (t.phase === 'closing') {
     box.appendChild(el('p', 'text', d.closing));
     appendNext(box, d.card ? '收下天音卡 ▸' : '繼續前行 ▸', handlers.onFinish);

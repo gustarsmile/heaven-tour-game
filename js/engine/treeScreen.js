@@ -1,12 +1,14 @@
-// tree 型別畫面狀態機：sapling（序章雲隙看樹苗）／read（東華宮案例樹考題＋讀你的樹）
+// tree 型別畫面狀態機：sapling（序章雲隙看樹苗）／read（東華宮案例樹考題＋讀你的樹）／judge（三官殿考核・補過）
 export function treePhases(data) {
   if (data.mode === 'sapling') return ['look', 'closing', 'done'];
+  if (data.mode === 'judge') return ['tianguan', 'diguan', 'shuiguan', 'closing', 'done'];
   return ['garden', ...data.cases.map((_, i) => `case${i}`), 'read', 'closing', 'done'];
 }
 
-export function createTreeScreen(data) {
+// extras：流程層附加的畫面級資料（三官殿的 amends＝水官「還能補的站」）
+export function createTreeScreen(data, extras = {}) {
   const phases = treePhases(data);
-  return { data, phases, phase: phases[0], caseAttempted: {}, casePoints: {} };
+  return { data, phases, phase: phases[0], caseAttempted: {}, casePoints: {}, ...extras };
 }
 
 export function nextTreePhase(t) {

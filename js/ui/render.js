@@ -69,9 +69,10 @@ export function appendLines(box, lines) {
   }
 }
 
-export function appendTreeVerdicts(box, state, treeData) {
+// filter：只渲染符合條件的軸（三官殿天官只唸佳軸、地官只唸傷軸）
+export function appendTreeVerdicts(box, state, treeData, filter = () => true) {
   const list = el('div', 'tree-verdicts');
-  for (const r of readTree(state, treeData)) {
+  for (const r of readTree(state, treeData).filter(filter)) {
     const item = el('div', `tree-verdict verdict-${r.state}`);
     item.appendChild(el('div', 'verdict-part', `${r.part}・${r.label}`));
     item.appendChild(el('p', 'verdict-text', r.text));

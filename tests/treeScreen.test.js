@@ -46,3 +46,24 @@ describe('answerCase', () => {
     expect(treeMax(sapling)).toBe(0);
   });
 });
+
+const judge = {
+  id: 'j', mode: 'judge', title: 't', intro: [], closing: 'c',
+  tianguan: { lines: [], goodLead: 'g', noneLine: 'n', closing: 'c' },
+  diguan: { lines: [], badLead: 'b', prompt: 'p', reply: 'r{part}{label}', noneLine: 'n', skipHint: 's' },
+  shuiguan: { lines: [], remainLead: 'r', noneLine: 'n', closing: 'c' },
+};
+
+describe('三官殿 judge', () => {
+  it('階段 tianguan→diguan→shuiguan→closing→done；extras 展開；無案例題', () => {
+    expect(treePhases(judge)).toEqual(['tianguan', 'diguan', 'shuiguan', 'closing', 'done']);
+    const t = createTreeScreen(judge, { amends: [{ id: 'x', title: 'X', axes: ['ren'] }] });
+    expect(t.phase).toBe('tianguan');
+    expect(t.amends).toEqual([{ id: 'x', title: 'X', axes: ['ren'] }]);
+    expect(caseIndex(t)).toBeNull();
+    expect(() => answerCase(t, 0)).toThrow();
+    expect(treeMax(judge)).toBe(0);
+    ['diguan', 'shuiguan', 'closing', 'done', 'done'].forEach((p) => expect(nextTreePhase(t)).toBe(p));
+    expect(createTreeScreen(judge).amends).toBeUndefined();
+  });
+});

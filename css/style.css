@@ -269,6 +269,10 @@ body {
 .origin-summary { border-top: 1px solid var(--vermilion-dim); padding-top: 8px; }
 .origin-line { margin: 4px 0; color: var(--gold); text-align: center; }
 
+/* 三官殿・水官解厄：還能補的站 */
+.amend-list { margin: 8px 0 14px; padding-left: 1.2em; }
+.amend-list li { margin: 4px 0; }
+
 /* ===== 固定導覽：左上返回＋選單、右上音效 ===== */
 #nav-bar {
   position: fixed;
