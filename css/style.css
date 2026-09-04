@@ -273,6 +273,10 @@ body {
 .amend-list { margin: 8px 0 14px; padding-left: 1.2em; }
 .amend-list li { margin: 4px 0; }
 
+/* ===== 陰陽界（review 型別） ===== */
+.review-box .hall-title { letter-spacing: 0.15em; }
+.stage-name { text-align: center; color: var(--gold); letter-spacing: 0.3em; margin: 8px 0 10px; }
+
 /* ===== 固定導覽：左上返回＋選單、右上音效 ===== */
 #nav-bar {
   position: fixed;
