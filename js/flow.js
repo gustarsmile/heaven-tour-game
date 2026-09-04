@@ -1,11 +1,12 @@
 import { GAME_TITLE, PROLOGUE_ID } from './config.js';
 import {
-  createState, recordChoice, creditWu, resetScreen, finalWu, save, load, clearSave,
+  createState, recordChoice, creditWu, resetScreen, finalWu, save, load, clearSave, setRepent,
 } from './state.js';
 import { loadBooklet, addCard, clearBooklet } from './booklet.js';
 import { createPlayer } from './engine/scene.js';
 import { createVisit, nextVisitPhase, prevVisitPhase, answerQuiz, chooseMercy, takeBranch, visitScore } from './engine/visit.js';
 import { createTreeScreen, nextTreePhase, prevTreePhase, answerCase, caseIndex, treeScore, treeMax } from './engine/treeScreen.js';
+import { remainingAmends } from './engine/judge.js';
 import { createFinale, nextFinalePhase, prevFinalePhase, endingKey } from './engine/finale.js';
 import { renderNode, el } from './ui/render.js';
 import { renderCard } from './ui/cardView.js';
@@ -160,7 +161,11 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
   }
 
   function runTree(data, onEnd) {
-    const t = createTreeScreen(data);
+    // 三官殿：水官解厄要知道「往後還能補的站」（依當前模式清單）
+    const extras = data.mode === 'judge'
+      ? { amends: remainingAmends(modeList, resources, currentScreenId) }
+      : {};
+    const t = createTreeScreen(data, extras);
     let message = '';
     const step = () => {
       setLocalBack(t.phase !== t.phases[0]
@@ -176,6 +181,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
         message = r.correct ? '' : data.cases[caseIndex(t)].hint;
         step();
       },
+      onRepent: (axis) => { setRepent(state, axis, currentScreenId); audio.chime(); step(); }, // 限一次：視圖見 state.repent 即不再出選項
       onFinish: () => { creditWu(state, currentScreenId, treeScore(t)); onEnd(); },
     };
     step();

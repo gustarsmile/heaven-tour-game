@@ -13,6 +13,7 @@
     { "id": "kongzi", "type": "visit", "src": "kongzi.json" },
     { "id": "shijia", "type": "visit", "src": "shijia.json" },
     { "id": "guanyin", "type": "visit", "src": "guanyin.json" },
+    { "id": "sanguan", "type": "tree", "src": "sanguan.json" },
     { "id": "zhongyi", "type": "visit", "src": "zhongyi.json" },
     { "id": "xiaozi", "type": "scene", "src": "xiaozi.json" },
     { "id": "baxian", "type": "visit", "src": "baxian.json" },

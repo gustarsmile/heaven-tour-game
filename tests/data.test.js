@@ -97,7 +97,7 @@ function validateVisit(v) {
 }
 
 function validateTree(t) {
-  expect(['sapling', 'read']).toContain(t.mode);
+  expect(['sapling', 'read', 'judge']).toContain(t.mode);
   expect(t.title.length).toBeGreaterThan(0);
   expect(t.intro.length).toBeGreaterThanOrEqual(1);
   expect(t.closing.length).toBeGreaterThan(0);
@@ -105,6 +105,18 @@ function validateTree(t) {
   if (t.mode === 'sapling') {
     expect(t.look.lines.length).toBeGreaterThanOrEqual(1);
     expect(t.card).toBeUndefined();
+    return;
+  }
+  if (t.mode === 'judge') {
+    expect(t.tianguan.lines.length).toBeGreaterThanOrEqual(1);
+    for (const k of ['goodLead', 'noneLine', 'closing']) expect(t.tianguan[k].length, `tianguan.${k}`).toBeGreaterThan(0);
+    expect(t.diguan.lines.length).toBeGreaterThanOrEqual(1);
+    for (const k of ['badLead', 'prompt', 'reply', 'noneLine', 'skipHint']) expect(t.diguan[k].length, `diguan.${k}`).toBeGreaterThan(0);
+    expect(t.diguan.reply).toContain('{part}');
+    expect(t.diguan.reply).toContain('{label}');
+    expect(t.shuiguan.lines.length).toBeGreaterThanOrEqual(1);
+    for (const k of ['remainLead', 'noneLine', 'closing']) expect(t.shuiguan[k].length, `shuiguan.${k}`).toBeGreaterThan(0);
+    validateCard(t.card);
     return;
   }
   expect(t.garden.lines.length).toBeGreaterThanOrEqual(1);
@@ -169,11 +181,11 @@ describe('flow.json 驗證', () => {
       expect(ids[0]).toBe('prologue');
     }
   });
-  it('階段 2 完整版畫面順序固定（防止站點被默默移除）', () => {
+  it('階段 3 完整版畫面順序固定（防止站點被默默移除）', () => {
     expect(flow.screens.map((s) => s.id)).toEqual([
       'prologue', 'interlude', 'sapling', 'gate', 'sanqinghe', 'donghua',
       'nanhua', 'xihua', 'beihua', 'zhonghua', 'kongzi', 'shijia', 'guanyin',
-      'zhongyi', 'xiaozi', 'baxian', 'yaochi',
+      'sanguan', 'zhongyi', 'xiaozi', 'baxian', 'yaochi',
     ]);
   });
 });
@@ -278,5 +290,23 @@ describe('孝子殿專屬驗證', () => {
       expect(n.choices.map((c) => c.karma.delta)).toEqual([1, 0, -1]);
     }
     validateCard(xiaozi.card);
+  });
+});
+
+// ---------- 三官殿專屬 ----------
+
+describe('三官殿專屬驗證', () => {
+  it('tree:judge、插在普陀山之後忠義殿之前、天音卡出自第 31 回地官', () => {
+    const ids = flow.screens.map((s) => s.id);
+    const scr = flow.screens.find((s) => s.id === 'sanguan');
+    expect(scr.type).toBe('tree');
+    expect(FILES['sanguan.json'].mode).toBe('judge');
+    expect(ids.indexOf('sanguan')).toBe(ids.indexOf('guanyin') + 1);
+    expect(ids.indexOf('zhongyi')).toBe(ids.indexOf('sanguan') + 1);
+    expect(FILES['sanguan.json'].card.source.chapter).toBe(31);
+    expect(FILES['sanguan.json'].card.speaker).toBe('地官大帝');
+  });
+  it('普陀山結語不再指向忠義殿（後接三官殿）', () => {
+    expect(FILES['guanyin.json'].closing).not.toContain('兩位人間的榜樣');
   });
 });

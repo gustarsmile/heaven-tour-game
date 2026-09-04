@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
 import { describe, it, expect } from 'vitest';
 import { startGame } from '../js/flow.js';
-import { createState, save, load, finalWu, rawWu } from '../js/state.js';
+import { createState, save, load, finalWu, rawWu, karmaSum } from '../js/state.js';
 import { endingKey } from '../js/engine/finale.js';
+import { treeTotal } from '../js/engine/tree.js';
 import { loadBooklet, addCard } from '../js/booklet.js';
 import { GAME_TITLE } from '../js/config.js';
 
@@ -228,7 +229,7 @@ describe('全流程整合（flow manifest）', () => {
     autoplay(root, storage, { acceptBranch: true });
     const cardScreens = flowData.screens
       .filter((s) => resourceOf(s.id)?.card).map((s) => s.id);
-    expect(cardScreens.length).toBe(13);
+    expect(cardScreens.length).toBe(14);
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
     // 重新開始 → 封面選模式開新局 → 善書冊歸零（使用者裁決：歸零比較有動力再完成一次）
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
@@ -354,5 +355,37 @@ describe('五軸覆蓋（完整版整合守門）', () => {
     for (const axis of ['ren', 'yi', 'li', 'zhi', 'xin']) {
       expect(s.choices.filter((c) => c.axis === axis).length, axis).toBeGreaterThanOrEqual(2);
     }
+  });
+});
+
+describe('三官殿懺悔補過（完整版整合）', () => {
+  it('全善通關：無傷軸，repent 維持 null', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON, storage });
+    autoplay(root, storage, { acceptBranch: true });
+    expect(load(storage).repent).toBeNull();
+  });
+  it('惡向通關：地官階段補過一軸（autoplay 取末項＝信），記在 sanguan；樹總分＝選擇總和＋1', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON, storage });
+    autoplay(root, storage, { acceptBranch: true, evil: true });
+    const s = load(storage);
+    expect(s.repent).toEqual({ axis: 'xin', screen: 'sanguan' });
+    expect(treeTotal(s)).toBe(karmaSum(s) + 1);
+    expect(s.wuByScreen.sanguan ?? 0).toBe(0); // 三官殿無考題
+  });
+  it('補過後再從選單直達三官殿 → resetScreen 清掉補過，可重選', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    let cfg = null;
+    const nav = { setBack() {}, closeMenu() {}, toast() {}, setMenu(c) { if (c) cfg = c; } };
+    await startGame({ root, loadJSON, storage, nav });
+    autoplay(root, storage, { acceptBranch: true, evil: true });
+    expect(load(storage).repent).not.toBeNull();
+    cfg.onJump('sanguan');
+    expect(load(storage).repent).toBeNull();
+    expect(root.textContent).toContain(FILES['js/data/sanguan.json'].intro[0].text);
   });
 });
