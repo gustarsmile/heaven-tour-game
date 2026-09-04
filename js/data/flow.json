@@ -16,6 +16,7 @@
     { "id": "sanguan", "type": "tree", "src": "sanguan.json" },
     { "id": "zhongyi", "type": "visit", "src": "zhongyi.json" },
     { "id": "xiaozi", "type": "scene", "src": "xiaozi.json" },
+    { "id": "yinyang", "type": "review", "src": "yinyang.json" },
     { "id": "baxian", "type": "visit", "src": "baxian.json" },
     { "id": "yaochi", "type": "finale", "src": "yaochi.json" }
   ],

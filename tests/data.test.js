@@ -156,6 +156,36 @@ function validateFinale(f) {
   expectArt(f.art.scene);
 }
 
+const STAGE_AXES = ['xin', 'li', 'yi', 'ren', 'zhi']; // 腳→六根→肚腸→心→絕塵嶺（設計 §3.4）
+
+function validateReview(r) {
+  expect(r.title.length).toBeGreaterThan(0);
+  expect(r.intro.length).toBeGreaterThanOrEqual(1);
+  for (const k of ['good', 'bad']) {
+    expect(r.fork[k].lines.length, `fork.${k}`).toBeGreaterThanOrEqual(1);
+    expect(r.road[k].lines.length, `road.${k}`).toBeGreaterThanOrEqual(1);
+  }
+  expect(r.guests.length).toBe(3);
+  for (const g of r.guests) {
+    expect(g.name.length).toBeGreaterThan(0);
+    expect(g.lines.length).toBeGreaterThanOrEqual(1);
+    expect(g.quiz.question.length).toBeGreaterThan(0);
+    expect(g.quiz.options.length).toBe(3);
+    expect(g.quiz.answer).toBeGreaterThanOrEqual(0);
+    expect(g.quiz.answer).toBeLessThan(3);
+    expect(g.quiz.hint.length).toBeGreaterThan(0);
+    expect(g.quiz.reveal.length).toBeGreaterThan(0);
+  }
+  expect(r.stages.map((s) => s.axis)).toEqual(STAGE_AXES);
+  for (const s of r.stages) {
+    for (const key of ['name', 'line', 'empty']) expect(s[key].length, key).toBeGreaterThan(0);
+    for (const k of ['good', 'flat', 'bad']) expect(s.comment[k].length, `comment.${k}`).toBeGreaterThan(0);
+  }
+  expect(r.closing.length).toBeGreaterThan(0);
+  validateCard(r.card);
+  expectArt(r.art.scene);
+}
+
 // ---------- flow.json 守門 ----------
 
 describe('flow.json 驗證', () => {
@@ -165,7 +195,7 @@ describe('flow.json 驗證', () => {
     expect(flow.screens[0].id).toBe('prologue');
     expect(flow.screens.at(-1).type).toBe('finale');
     for (const s of flow.screens) {
-      expect(['scene', 'visit', 'tree', 'finale']).toContain(s.type);
+      expect(['scene', 'visit', 'tree', 'review', 'finale']).toContain(s.type);
       expect(FILES[s.src]).toBeDefined();
       if (s.type === 'scene') expectArt(FILES[s.src].art);
     }
@@ -185,7 +215,7 @@ describe('flow.json 驗證', () => {
     expect(flow.screens.map((s) => s.id)).toEqual([
       'prologue', 'interlude', 'sapling', 'gate', 'sanqinghe', 'donghua',
       'nanhua', 'xihua', 'beihua', 'zhonghua', 'kongzi', 'shijia', 'guanyin',
-      'sanguan', 'zhongyi', 'xiaozi', 'baxian', 'yaochi',
+      'sanguan', 'zhongyi', 'xiaozi', 'yinyang', 'baxian', 'yaochi',
     ]);
   });
 });
@@ -203,6 +233,8 @@ describe('內容資料驗證', () => {
       it(`${scr.src}：見聞殿結構正確`, () => validateVisit(FILES[scr.src]));
     } else if (scr.type === 'tree') {
       it(`${scr.src}：看樹站結構正確`, () => validateTree(FILES[scr.src]));
+    } else if (scr.type === 'review') {
+      it(`${scr.src}：結算關（陰陽界）結構正確`, () => validateReview(FILES[scr.src]));
     } else if (scr.type === 'finale') {
       it(`${scr.src}：結算關結構正確`, () => validateFinale(FILES[scr.src]));
     }
@@ -308,5 +340,21 @@ describe('三官殿專屬驗證', () => {
   });
   it('普陀山結語不再指向忠義殿（後接三官殿）', () => {
     expect(FILES['guanyin.json'].closing).not.toContain('兩位人間的榜樣');
+  });
+});
+
+// ---------- 陰陽界專屬 ----------
+
+describe('陰陽界專屬驗證', () => {
+  it('review 型別、插在孝子殿之後；八仙移到陰陽界之後、瑤池之前；天音卡出自第 34 回濟佛', () => {
+    const ids = flow.screens.map((s) => s.id);
+    expect(flow.screens.find((s) => s.id === 'yinyang').type).toBe('review');
+    expect(ids.indexOf('yinyang')).toBe(ids.indexOf('xiaozi') + 1);
+    expect(ids.indexOf('baxian')).toBe(ids.indexOf('yinyang') + 1);
+    expect(ids.indexOf('yaochi')).toBe(ids.indexOf('baxian') + 1);
+    const y = FILES['yinyang.json'];
+    expect(y.card.source.chapter).toBe(34);
+    expect(y.card.speaker).toBe('濟佛');
+    expect(y.guests.map((g) => g.quiz.answer)).toEqual([1, 0, 2]); // 三題答案位置錯開
   });
 });

@@ -7,11 +7,13 @@ import { createPlayer } from './engine/scene.js';
 import { createVisit, nextVisitPhase, prevVisitPhase, answerQuiz, chooseMercy, takeBranch, visitScore } from './engine/visit.js';
 import { createTreeScreen, nextTreePhase, prevTreePhase, answerCase, caseIndex, treeScore, treeMax } from './engine/treeScreen.js';
 import { remainingAmends } from './engine/judge.js';
+import { createReview, nextReviewPhase, prevReviewPhase, answerGuest, guestIndex, reviewScore, reviewMax } from './engine/review.js';
 import { createFinale, nextFinalePhase, prevFinalePhase, endingKey } from './engine/finale.js';
 import { renderNode, el } from './ui/render.js';
 import { renderCard } from './ui/cardView.js';
 import { renderVisitPhase } from './ui/visitView.js';
 import { renderTreePhase } from './ui/treeView.js';
+import { renderReviewPhase } from './ui/reviewView.js';
 import { renderFinalePhase, renderShareOverlay } from './ui/finaleView.js';
 import { renderBooklet } from './ui/bookletView.js';
 import { renderCover } from './ui/coverView.js';
@@ -77,7 +79,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     return ids.map((id) => flow.screens.find((s) => s.id === id)).filter(Boolean);
   }
 
-  // 該模式滿分：考題 5、案例樹題 5、支線功德
+  // 該模式滿分：考題 5、案例樹題 5、歸天者題 5、支線功德
   function computeWuMax(list) {
     let max = 0;
     for (const scr of list) {
@@ -85,6 +87,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
       if (!d) continue;
       if (scr.type === 'visit') max += (d.quiz ? 5 : 0) + (d.branch?.rewardWu ?? 0);
       if (scr.type === 'tree') max += treeMax(d);
+      if (scr.type === 'review') max += reviewMax(d);
     }
     return max;
   }
@@ -183,6 +186,33 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
       },
       onRepent: (axis) => { setRepent(state, axis, currentScreenId); audio.chime(); step(); }, // 限一次：視圖見 state.repent 即不再出選項
       onFinish: () => { creditWu(state, currentScreenId, treeScore(t)); onEnd(); },
+    };
+    step();
+  }
+
+  // 站名表：樹的來歷／通天五段回放用來把 choice.screen 換成站名（choice 有 label 者優先用 label）
+  function screenTitles() {
+    return Object.fromEntries(flow.screens.map((scr) => [scr.id, menuTitleOf(scr)]));
+  }
+
+  function runReview(data, onEnd) {
+    const r = createReview(data);
+    let message = '';
+    const step = () => {
+      setLocalBack(r.phase !== r.phases[0]
+        ? () => { message = ''; prevReviewPhase(r); step(); }
+        : null);
+      renderReviewPhase(r, state, screenTitles(), handlers, root, message);
+    };
+    const handlers = {
+      onNextPhase: () => { message = ''; nextReviewPhase(r); step(); },
+      onGuest: (i) => {
+        const res = answerGuest(r, i);
+        if (res.correct) audio.chime();
+        message = res.correct ? '' : data.guests[guestIndex(r)].quiz.hint;
+        step();
+      },
+      onFinish: () => { creditWu(state, currentScreenId, reviewScore(r)); onEnd(); },
     };
     step();
   }
@@ -295,6 +325,13 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
       runScene(linesToScene(data.intro, data.art?.scene), () =>
         runTree(data, () => {
           if (!data.card) { goNext(); return; }
+          audio.flip();
+          setLocalBack(null);
+          renderCard(data.card, collectCard, root);
+        }));
+    } else if (scr.type === 'review') {
+      runScene(linesToScene(data.intro, data.art?.scene), () =>
+        runReview(data, () => {
           audio.flip();
           setLocalBack(null);
           renderCard(data.card, collectCard, root);

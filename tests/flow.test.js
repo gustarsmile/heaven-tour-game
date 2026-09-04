@@ -46,6 +46,7 @@ function expectedRaw(screens, { acceptBranch } = {}) {
       if (acceptBranch) raw += data.branch.rewardWu;
     }
     if (scr.type === 'tree' && data.mode === 'read') { max += data.cases.length * 5; raw += data.cases.length * 5; }
+    if (scr.type === 'review') { max += data.guests.length * 5; raw += data.guests.length * 5; }
   }
   return { raw, max };
 }
@@ -70,6 +71,7 @@ function autoplay(root, storage, { acceptBranch = true, evil = false } = {}) {
       let idx = 0;
       if (list?.dataset.kind === 'case') idx = data.cases[Number(list.dataset.index)].answer;
       else if (list?.dataset.kind === 'quiz') idx = data.quiz.answer;
+      else if (list?.dataset.kind === 'guest') idx = data.guests[Number(list.dataset.index)].quiz.answer;
       else if (evil) idx = choices.length - 1; // 道德選擇全選最惡（末選項慣例）
       choices[idx].click();
       continue;
@@ -123,7 +125,7 @@ describe('全流程整合（flow manifest）', () => {
     const s = load(storage);
     expect(rawWu(s)).toBe(raw);
     expect(s.wuMax).toBe(max);
-    expect(s.wuMax).toBe(80);
+    expect(s.wuMax).toBe(95);
     const wu = max > 0 ? Math.round((raw / max) * 100) : 0;
     expect(finalWu(s)).toBe(wu);
     expect(finalWu(s)).toBe(100);
@@ -229,7 +231,7 @@ describe('全流程整合（flow manifest）', () => {
     autoplay(root, storage, { acceptBranch: true });
     const cardScreens = flowData.screens
       .filter((s) => resourceOf(s.id)?.card).map((s) => s.id);
-    expect(cardScreens.length).toBe(14);
+    expect(cardScreens.length).toBe(15);
     expect([...loadBooklet(storage)].sort()).toEqual([...cardScreens].sort());
     // 重新開始 → 封面選模式開新局 → 善書冊歸零（使用者裁決：歸零比較有動力再完成一次）
     [...root.querySelectorAll('button')].find((b) => b.textContent === '重新開始').click();
@@ -387,5 +389,38 @@ describe('三官殿懺悔補過（完整版整合）', () => {
     cfg.onJump('sanguan');
     expect(load(storage).repent).toBeNull();
     expect(root.textContent).toContain(FILES['js/data/sanguan.json'].intro[0].text);
+  });
+});
+
+describe('陰陽界結算（完整版整合）', () => {
+  it('三位歸天者答對得 15 分入 yinyang；惡向亦得 15（悟性與五軸不連坐）', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON, storage });
+    autoplay(root, storage, { acceptBranch: true });
+    expect(load(storage).wuByScreen.yinyang).toBe(15);
+    const storage2 = fakeStorage();
+    const root2 = document.createElement('div');
+    await startGame({ root: root2, loadJSON, storage: storage2 });
+    autoplay(root2, storage2, { acceptBranch: true, evil: true });
+    expect(load(storage2).wuByScreen.yinyang).toBe(15);
+  });
+  it('答錯歸天者考題顯示 hint，重答對後 0 分', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    const s = createState();
+    s.progress.screen = 'yinyang';
+    save(s, storage);
+    await startGame({ root, loadJSON, storage });
+    [...root.querySelectorAll('button')].find((b) => b.textContent === '繼續旅程').click();
+    while (!root.querySelector('.choices[data-kind="guest"]')) root.querySelector('.btn-next').click();
+    const y = FILES['js/data/yinyang.json'];
+    const wrong = (y.guests[0].quiz.answer + 1) % 3;
+    root.querySelectorAll('.btn-choice')[wrong].click();
+    expect(root.querySelector('.feedback').textContent).toBe(y.guests[0].quiz.hint);
+    root.querySelectorAll('.btn-choice')[y.guests[0].quiz.answer].click();
+    expect(root.querySelector('.feedback').textContent).toBe(y.guests[0].quiz.reveal);
+    autoplay(root, storage, { acceptBranch: true });
+    expect(load(storage).wuByScreen.yinyang).toBe(10);
   });
 });
