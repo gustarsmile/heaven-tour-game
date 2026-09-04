@@ -152,6 +152,10 @@ body {
 }
 .booklet-card.missing { opacity: 0.55; border-style: dashed; }
 .booklet-hall { color: var(--gold); letter-spacing: 0.2em; margin-bottom: 4px; }
+.booklet-tabs { display: flex; gap: 8px; margin: 0 0 12px; }
+.booklet-tab { flex: 1; margin: 0; text-align: center; }
+.booklet-tab.active { color: var(--gold); border-color: var(--gold); background: rgba(169, 131, 42, 0.12); }
+.booklet-locked { color: var(--paper-dim); text-align: center; padding: 16px 0; }
 
 /* 結算關 */
 .ending-title {

@@ -8,6 +8,7 @@ import { renderFinalePhase, renderShareOverlay } from '../js/ui/finaleView.js';
 import { createVisit, nextVisitPhase } from '../js/engine/visit.js';
 import { createFinale } from '../js/engine/finale.js';
 import { createState, recordChoice, creditWu } from '../js/state.js';
+import { treeOrigin } from '../js/engine/origin.js';
 import yaochi from '../js/data/yaochi.json';
 import treeData from '../js/data/tree.json';
 
@@ -226,6 +227,37 @@ describe('bookletView', () => {
     const onBack = vi.fn();
     renderBooklet(full, onBack, root);
     expect(root.textContent).not.toContain('重遊');
+    [...root.querySelectorAll('button')].find((b) => b.textContent.includes('合上')).click();
+    expect(onBack).toHaveBeenCalled();
+  });
+  it('頁籤：預設天音卡；「我的樹」未解鎖顯示上鎖提示、無總覽；合上鈕仍為最後一鈕', () => {
+    const root = document.createElement('div');
+    renderBooklet(entries, vi.fn(), root);
+    const tabs = root.querySelectorAll('.booklet-tab');
+    expect([...tabs].map((t) => t.dataset.tab)).toEqual(['cards', 'tree']);
+    expect(tabs[0].className).toContain('active');
+    tabs[1].click();
+    expect(root.querySelector('.booklet-tab[data-tab="tree"]').className).toContain('active');
+    expect(root.querySelector('.booklet-locked')).not.toBeNull();
+    expect(root.querySelectorAll('.origin-axis').length).toBe(0);
+    expect(root.querySelectorAll('.booklet-card').length).toBe(0);
+    const btns = root.querySelectorAll('button');
+    expect(btns[btns.length - 1].textContent).toContain('合上');
+    root.querySelector('.booklet-tab[data-tab="cards"]').click();
+    expect(root.querySelectorAll('.booklet-card').length).toBe(2);
+  });
+  it('「我的樹」已解鎖：顯示五部位總覽；合上鈕觸發 onBack', () => {
+    const s = createState();
+    s.wuMax = 100;
+    creditWu(s, 'x', 50);
+    recordChoice(s, { screen: 'gate', scene: 'gate', text: '見聖', axis: 'li', delta: 1 });
+    const origin = treeOrigin(s, treeData, { gate: '南天門' });
+    const root = document.createElement('div');
+    const onBack = vi.fn();
+    renderBooklet(entries, onBack, root, { origin, tab: 'tree' });
+    expect(root.querySelector('.booklet-locked')).toBeNull();
+    expect(root.querySelectorAll('.origin-axis').length).toBe(5);
+    expect(root.querySelector('.origin-where').textContent).toBe('南天門');
     [...root.querySelectorAll('button')].find((b) => b.textContent.includes('合上')).click();
     expect(onBack).toHaveBeenCalled();
   });

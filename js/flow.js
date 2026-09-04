@@ -9,6 +9,7 @@ import { createTreeScreen, nextTreePhase, prevTreePhase, answerCase, caseIndex, 
 import { remainingAmends } from './engine/judge.js';
 import { createReview, nextReviewPhase, prevReviewPhase, answerGuest, guestIndex, reviewScore, reviewMax } from './engine/review.js';
 import { createFinale, nextFinalePhase, prevFinalePhase, endingKey } from './engine/finale.js';
+import { treeOrigin } from './engine/origin.js';
 import { renderNode, el } from './ui/render.js';
 import { renderCard } from './ui/cardView.js';
 import { renderVisitPhase } from './ui/visitView.js';
@@ -230,6 +231,12 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
   }
 
   // 善書冊疊層：不打斷當前站的進度
+  // 「我的樹」：瑤池看過樹的來歷後才解鎖（設計 §3.6 通關後隨時可回看）
+  function bookletOrigin() {
+    return state.progress.originUnlocked ? treeOrigin(state, treeData, screenTitles()) : null;
+  }
+
+  // 善書冊疊層：不打斷當前站的進度
   function openBookletOverlay() {
     audio.flip();
     const overlay = el('div');
@@ -238,7 +245,7 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     overlay.appendChild(inner);
     document.body.appendChild(overlay);
     const layer = pushLayer(() => overlay.remove());
-    renderBooklet(bookletEntries(), () => layer.close(), inner);
+    renderBooklet(bookletEntries(), () => layer.close(), inner, { origin: bookletOrigin() });
   }
 
   function runFinale(data) {

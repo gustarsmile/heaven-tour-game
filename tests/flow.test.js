@@ -453,3 +453,36 @@ describe('瑤池：樹的來歷解鎖旗標', () => {
     expect(root.querySelector('.finale-end')).not.toBeNull();
   });
 });
+
+describe('善書冊「我的樹」頁籤（通關解鎖）', () => {
+  const overlay = () => document.querySelector('#booklet-overlay');
+  const closeBooklet = () => {
+    [...overlay().querySelectorAll('button')].find((b) => b.textContent.includes('合上')).click();
+    document.querySelectorAll('#booklet-overlay').forEach((n) => n.remove());
+  };
+  it('旅途中開冊：頁籤上鎖；通關後顯示五部位與每一筆選擇（含補過列）', async () => {
+    const storage = fakeStorage();
+    const root = document.createElement('div');
+    let cfg = null;
+    const nav = { setBack() {}, closeMenu() {}, toast() {}, setMenu(c) { if (c) cfg = c; } };
+    await startGame({ root, loadJSON, storage, nav });
+    root.querySelector('.btn-next').click(); // 封面「完整遊歷」→ 序章
+    cfg.onBooklet();
+    overlay().querySelector('.booklet-tab[data-tab="tree"]').click();
+    expect(overlay().querySelector('.booklet-locked')).not.toBeNull();
+    expect(overlay().querySelectorAll('.origin-axis').length).toBe(0);
+    closeBooklet();
+    expect(overlay()).toBeNull();
+
+    autoplay(root, storage, { acceptBranch: true, evil: true });
+    const s = load(storage);
+    expect(s.progress.originUnlocked).toBe(true);
+    [...root.querySelectorAll('button')].find((b) => b.textContent.includes('善書冊')).click();
+    overlay().querySelector('.booklet-tab[data-tab="tree"]').click();
+    expect(overlay().querySelector('.booklet-locked')).toBeNull();
+    expect(overlay().querySelectorAll('.origin-axis').length).toBe(5);
+    expect(overlay().querySelectorAll('.origin-row').length).toBe(s.choices.length + 1);
+    expect(overlay().querySelectorAll('.origin-row.effect-repent').length).toBe(1);
+    closeBooklet();
+  });
+});
