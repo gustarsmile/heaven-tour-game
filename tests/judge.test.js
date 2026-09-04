@@ -28,6 +28,9 @@ describe('remainingAmends', () => {
   it('之後無可補之站 → 空陣列', () => {
     expect(remainingAmends(list, resources, 'baxian')).toEqual([]);
   });
+  it('currentId 不在清單 → 回空陣列（不回整張清單）', () => {
+    expect(remainingAmends(list, resources, 'not-a-screen')).toEqual([]);
+  });
 });
 
 describe('repentOptions', () => {

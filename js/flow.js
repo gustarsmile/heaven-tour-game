@@ -230,7 +230,6 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
       }));
   }
 
-  // 善書冊疊層：不打斷當前站的進度
   // 「我的樹」：瑤池看過樹的來歷後才解鎖（設計 §3.6 通關後隨時可回看）
   function bookletOrigin() {
     return state.progress.originUnlocked ? treeOrigin(state, treeData, screenTitles()) : null;

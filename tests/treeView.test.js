@@ -11,7 +11,7 @@ import donghua from '../js/data/donghua.json';
 function prologueState(goodCount) {
   const s = createState();
   AXES.forEach((axis, i) => recordChoice(s, {
-    screen: 'prologue', scene: 'prologue', label: 'l', text: 't', axis, delta: i < goodCount ? 1 : -1, weight: 2,
+    screen: 'prologue', scene: 'prologue', label: 'l', text: '序章選項', axis, delta: i < goodCount ? 1 : -1, weight: 2,
   }));
   return s;
 }
@@ -83,7 +83,7 @@ describe('treeView 讀樹', () => {
 });
 
 const judgeData = {
-  id: 'sanguan', mode: 'judge', title: '三官殿', art: { scene: 'gate-scene.webp' }, intro: [], closing: 'C',
+  id: 'sanguan', mode: 'judge', title: '三官殿', art: { scene: 'gate-scene.webp' }, intro: [], closing: '三官宴罷，還有路要趕。',
   tianguan: { lines: [{ speaker: '天官', text: 'T' }], goodLead: 'GL', noneLine: 'TN', closing: 'TC' },
   diguan: { lines: [{ speaker: '地官', text: 'D' }], badLead: 'BL', prompt: 'DP', reply: 'R{part}{label}', noneLine: 'DN', skipHint: 'SH' },
   shuiguan: { lines: [{ speaker: '水官', text: 'S' }], remainLead: 'RL', noneLine: 'SN', closing: 'SC' },
@@ -130,7 +130,7 @@ describe('treeView 三官殿（judge）', () => {
     const btns = list.querySelectorAll('.btn-choice');
     expect([...btns].map((b) => b.dataset.axis)).toEqual(['zhi', 'xin']);
     expect(btns[1].textContent).toContain('幹・信');
-    expect(btns[1].textContent).toContain('t'); // prologueState 的選項文字
+    expect(btns[1].textContent).toContain('序章選項'); // prologueState 的選項文字
     expect(root.querySelector('.btn-next')).toBeNull();
     btns[1].click();
     expect(onRepent).toHaveBeenCalledWith('xin');
@@ -183,7 +183,7 @@ describe('treeView 三官殿（judge）', () => {
     t.phase = 'closing';
     const onFinish = vi.fn();
     renderTreePhase(t, prologueState(3), treeData, { onFinish }, root);
-    expect(root.textContent).toContain('C');
+    expect(root.textContent).toContain('三官宴罷，還有路要趕。');
     expect(root.querySelector('.btn-next').textContent).toContain('收下天音卡');
     root.querySelector('.btn-next').click();
     expect(onFinish).toHaveBeenCalled();

@@ -17,6 +17,7 @@ export function axesOf(value, out = new Set()) {
 // 目前站之後、還會寫入五軸的站（依當前模式清單）
 export function remainingAmends(modeList, resources, currentId) {
   const idx = modeList.findIndex((s) => s.id === currentId);
+  if (idx < 0) return []; // 不在清單的站沒有「之後」可言
   return modeList.slice(idx + 1)
     .map((s) => {
       const d = resources[s.id];
