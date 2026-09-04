@@ -238,6 +238,37 @@ body {
 .verdict-text { margin: 4px 0 0; }
 .tree-level { text-align: center; color: var(--gold); letter-spacing: 0.3em; margin: 8px 0; }
 
+/* ===== 樹的來歷（設計 §3.6；陰陽界回放、瑤池總覽、善書冊「我的樹」共用） ===== */
+.origin { display: grid; gap: 12px; margin: 12px 0; }
+.origin-axis {
+  border: 1px solid var(--gold-dim);
+  border-left-width: 4px;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: rgba(169, 131, 42, 0.06);
+}
+.origin-axis.state-good { border-left-color: #6f9a4e; }
+.origin-axis.state-bad { border-left-color: var(--vermilion); background: rgba(168, 67, 42, 0.07); }
+.origin-head { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.origin-part { color: var(--gold); letter-spacing: 0.2em; }
+.origin-symptom { color: var(--paper-dim); font-size: 0.9rem; flex: 1; }
+.origin-total { color: var(--gold); font-size: 0.9rem; white-space: nowrap; }
+.origin-rows { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 6px; }
+.origin-row {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  border-left: 2px solid var(--gold-dim);
+  padding-left: 8px;
+}
+.origin-row.effect-up { border-left-color: #6f9a4e; }
+.origin-row.effect-down { border-left-color: var(--vermilion); }
+.origin-row.effect-repent { border-left-color: var(--azure); }
+.origin-where { display: block; color: var(--paper-dim); font-size: 0.8rem; }
+.origin-effect { color: var(--gold); margin-left: 6px; white-space: nowrap; }
+.origin-verdict { margin: 6px 0 0; font-size: 0.95rem; }
+.origin-summary { border-top: 1px solid var(--vermilion-dim); padding-top: 8px; }
+.origin-line { margin: 4px 0; color: var(--gold); text-align: center; }
+
 /* ===== 固定導覽：左上返回＋選單、右上音效 ===== */
 #nav-bar {
   position: fixed;
