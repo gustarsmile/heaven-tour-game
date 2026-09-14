@@ -364,8 +364,12 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     nav.setMenu(null);
     const saved = load(storage);
     const savedList = saved ? modeScreens(saved.mode) : [];
+    // 舊版存檔：記錄的滿分與現行不符 → 續玩會少掉新關卡的分數（階段 2 的存檔停在八仙或瑤池，
+    // 陰陽界已在其前面，那 15 分再也拿不到），一律回封面重開；滿分未記錄（0）者不擋。
+    const staleSave = Boolean(saved && saved.wuMax > 0 && saved.wuMax !== computeWuMax(savedList));
     const resumable = Boolean(
       saved
+      && !staleSave
       && saved.progress.screen !== savedList[0]?.id
       && savedList.some((s) => s.id === saved.progress.screen),
     );

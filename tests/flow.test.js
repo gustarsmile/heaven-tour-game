@@ -240,6 +240,29 @@ describe('全流程整合（flow manifest）', () => {
     expect(root.textContent).toContain('完整遊歷');
   });
 
+  it('舊版存檔（記錄的滿分與現行不符）→ 封面不顯示續玩', async () => {
+    const storage = fakeStorage();
+    const s = createState();
+    s.progress.screen = 'baxian'; // 階段 2 玩家停在八仙：陰陽界已在其前面，續玩再也拿不到那 15 分
+    s.wuMax = 80; // 階段 2 的完整版滿分
+    save(s, storage);
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON, storage });
+    expect(root.textContent).not.toContain('繼續旅程');
+    expect(root.textContent).toContain('完整遊歷');
+  });
+
+  it('現行存檔停在末站（瑤池）→ 滿分相符就照常續玩，可回看結果', async () => {
+    const storage = fakeStorage();
+    const s = createState();
+    s.progress.screen = 'yaochi';
+    s.wuMax = expectedRaw(flowData.screens, { acceptBranch: true }).max;
+    save(s, storage);
+    const root = document.createElement('div');
+    await startGame({ root, loadJSON, storage });
+    expect(root.textContent).toContain('繼續旅程');
+  });
+
   it('通關收滿天音卡入善書冊；重新開始開新局後冊歸零', async () => {
     const storage = fakeStorage();
     const root = document.createElement('div');
