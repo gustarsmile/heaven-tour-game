@@ -57,7 +57,7 @@ function expectedRaw(screens, { acceptBranch } = {}) {
 function karmaIndex(data, buttons, evil) {
   const texts = [...buttons].map((b) => b.textContent);
   const list = karmaChoiceLists(data).find((l) => l.length === texts.length && l.every((c, i) => c.text === texts[i]));
-  if (!list) throw new Error(`autoplay：找不到對應的道德抉擇（${texts.join(' / ')}）`);
+  if (!list) return null; // 無 karma 的純劇情分岔（目前沒有）：交回呼叫端取第 0 個；對錯站資料的話，悟性／delta 斷言會擋下
   const deltas = list.map((c) => c.karma?.delta ?? 0);
   return deltas.indexOf(evil ? Math.min(...deltas) : Math.max(...deltas));
 }
@@ -85,7 +85,7 @@ function autoplay(root, storage, { acceptBranch = true, evil = false } = {}) {
       else if (kind === 'quiz') idx = data.quiz.answer;
       else if (kind === 'guest') idx = data.guests[Number(list.dataset.index)].quiz.answer;
       else if (kind === 'repent') idx = evil ? choices.length - 1 : 0; // 地官補過清單依五軸順序列傷軸，惡向取末項＝信
-      else if (list) idx = karmaIndex(data, choices, evil); // 道德抉擇：依 delta 挑善／惡，不靠位置
+      else if (list) idx = karmaIndex(data, choices, evil) ?? 0; // 道德抉擇：依 delta 挑善／惡，不靠位置
       choices[idx].click();
       continue;
     }
