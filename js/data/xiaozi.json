@@ -13,9 +13,9 @@
       "id": "q1", "type": "choice", "label": "孝子殿・挨打的那一夜", "speaker": "孝子",
       "text": "「他停下來看著你——換作是你，被爹打了一頓，明天還勸不勸？」",
       "choices": [
-        { "text": "勸。忍著痛也要護著祖母，爹總有清醒的一天", "karma": { "axis": "ren", "delta": 1 }, "next": "x4" },
         { "text": "先不勸了，躲遠一點，等他酒醒再說", "karma": { "axis": "ren", "delta": 0 }, "next": "x4" },
-        { "text": "不勸了——被打的又不是祖母，是我", "karma": { "axis": "ren", "delta": -1 }, "next": "x4" }
+        { "text": "不勸了——被打的又不是祖母，是我", "karma": { "axis": "ren", "delta": -1 }, "next": "x4" },
+        { "text": "勸。忍著痛也要護著祖母，爹總有清醒的一天", "karma": { "axis": "ren", "delta": 1 }, "next": "x4" }
       ]
     },
     { "id": "x4", "type": "line", "speaker": "孝子", "text": "「我選了繼續勸，也繼續挨打——但我夜裡偷偷做工，賺的錢買吃的端給祖母。爹五十歲那年，肝壞了，走了。家裡剩我和祖母兩個人。」", "next": "x5" },
@@ -34,8 +34,8 @@
       "id": "q3", "type": "choice", "label": "孝子殿・省下來的錢", "speaker": "孝子",
       "text": "「一個人吃飽全家飽，那些積蓄——換作是你，怎麼用？」",
       "choices": [
-        { "text": "留一點過日子，其餘分給更苦的人家", "karma": { "axis": "yi", "delta": 1 }, "next": "x7" },
         { "text": "好好存著，防老防病", "karma": { "axis": "yi", "delta": 0 }, "next": "x7" },
+        { "text": "留一點過日子，其餘分給更苦的人家", "karma": { "axis": "yi", "delta": 1 }, "next": "x7" },
         { "text": "辛苦一輩子了，全部拿去吃好穿好犒賞自己", "karma": { "axis": "yi", "delta": -1 }, "next": "x7" }
       ]
     },

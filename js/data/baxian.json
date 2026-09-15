@@ -33,9 +33,9 @@
           "id": "bq", "type": "choice", "label": "八仙・葫蘆裡的劇終", "speaker": "呂洞賓",
           "text": "呂祖收起葫蘆，看著你：「人人都在戲裡演，少有人肯站出來看。看完了這齣——你怎麼想？」",
           "choices": [
-            { "text": "「回去要把日子過得有意義，別等『劇終』才後悔。」", "karma": { "axis": "zhi", "delta": 1 }, "next": "b5" },
+            { "text": "「反正是演戲，假的，跟我沒關係。」", "karma": { "axis": "zhi", "delta": -1 }, "next": "b5" },
             { "text": "「好可怕……我不想再看第二遍。」", "karma": { "axis": "zhi", "delta": 0 }, "next": "b5" },
-            { "text": "「反正是演戲，假的，跟我沒關係。」", "karma": { "axis": "zhi", "delta": -1 }, "next": "b5" }
+            { "text": "「回去要把日子過得有意義，別等『劇終』才後悔。」", "karma": { "axis": "zhi", "delta": 1 }, "next": "b5" }
           ]
         },
         { "id": "b5", "type": "line", "speaker": "濟公", "text": "「哈哈，戲是假的，日子是真的。八仙的戲法看完了——這一課，比十本經書都值。走，瑤池就在前面了。」", "next": "fin" },

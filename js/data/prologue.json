@@ -11,8 +11,8 @@
       "id": "q1", "type": "choice", "label": "清晨・隔壁的信箱", "speaker": "旁白",
       "text": "早上出門時，隔壁獨居的陳伯家門口，信箱塞滿了廣告單和帳單，好幾天沒人清了。門裡靜悄悄的……",
       "choices": [
-        { "text": "敲敲門問一聲：「陳伯，你還好嗎？」", "karma": { "axis": "ren", "delta": 1 }, "next": "t2" },
         { "text": "記在心裡，晚上回來再看看", "karma": { "axis": "ren", "delta": 0 }, "next": "t2" },
+        { "text": "敲敲門問一聲：「陳伯，你還好嗎？」", "karma": { "axis": "ren", "delta": 1 }, "next": "t2" },
         { "text": "別人家的事，管太多反而尷尬——先走了", "karma": { "axis": "ren", "delta": -1 }, "next": "t2" }
       ]
     },
@@ -21,9 +21,9 @@
       "id": "q2", "type": "choice", "label": "上午・早餐店的隊伍", "speaker": "旁白",
       "text": "早餐店前排了長長一列，一個人低頭滑手機，直接從你面前擠了進去。後面有人開始嘖聲……",
       "choices": [
-        { "text": "語氣平和地提醒：「後面有在排隊喔。」", "karma": { "axis": "li", "delta": 1 }, "next": "t3" },
+        { "text": "「喂，排隊不會嗎？」當場嗆回去，整排人都回頭看", "karma": { "axis": "li", "delta": -1 }, "next": "t3" },
         { "text": "瞪他一眼，什麼也沒說", "karma": { "axis": "li", "delta": 0 }, "next": "t3" },
-        { "text": "「喂，排隊不會嗎？」當場嗆回去，整排人都回頭看", "karma": { "axis": "li", "delta": -1 }, "next": "t3" }
+        { "text": "語氣平和地提醒：「後面有在排隊喔。」", "karma": { "axis": "li", "delta": 1 }, "next": "t3" }
       ]
     },
     { "id": "t3", "type": "line", "speaker": "旁白", "text": "下午，阿嬤來了，手裡提著一盒你最愛的鳳梨酥。", "next": "q3" },
@@ -41,9 +41,9 @@
       "id": "q4", "type": "choice", "label": "傍晚・弟弟的數學題", "speaker": "旁白",
       "text": "弟弟拿著一題數學來問你。你看了半天，其實自己也不會……",
       "choices": [
-        { "text": "老實說：「我也不會，我們一起查。」", "karma": { "axis": "zhi", "delta": 1 }, "next": "t5" },
         { "text": "「你先自己想想。」把他打發走", "karma": { "axis": "zhi", "delta": 0 }, "next": "t5" },
-        { "text": "隨便掰一個算法，講得很有把握", "karma": { "axis": "zhi", "delta": -1 }, "next": "t5" }
+        { "text": "隨便掰一個算法，講得很有把握", "karma": { "axis": "zhi", "delta": -1 }, "next": "t5" },
+        { "text": "老實說：「我也不會，我們一起查。」", "karma": { "axis": "zhi", "delta": 1 }, "next": "t5" }
       ]
     },
     { "id": "t5", "type": "line", "speaker": "旁白", "text": "夜裡，手機亮了一下。", "next": "q5" },
@@ -51,9 +51,9 @@
       "id": "q5", "type": "choice", "label": "晚上・上週的承諾", "speaker": "旁白",
       "text": "朋友傳來訊息：「明天早上搬家，你上週說會來幫忙，還算數嗎？」你看了看沙發，明天是難得的假日……",
       "choices": [
+        { "text": "「我臨時有事。」——其實只是不想去", "karma": { "axis": "xin", "delta": -1 }, "next": "end1" },
         { "text": "「算數，幾點到？」", "karma": { "axis": "xin", "delta": 1 }, "next": "end1" },
-        { "text": "「我盡量，早上看情況。」", "karma": { "axis": "xin", "delta": 0 }, "next": "end1" },
-        { "text": "「我臨時有事。」——其實只是不想去", "karma": { "axis": "xin", "delta": -1 }, "next": "end1" }
+        { "text": "「我盡量，早上看情況。」", "karma": { "axis": "xin", "delta": 0 }, "next": "end1" }
       ]
     },
     { "id": "end1", "type": "line", "speaker": "旁白", "text": "夜深了。你關了燈。窗外的月亮很亮，亮得不像平常。", "next": "fin" },

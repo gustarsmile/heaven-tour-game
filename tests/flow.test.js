@@ -6,6 +6,7 @@ import { endingKey } from '../js/engine/finale.js';
 import { treeTotal } from '../js/engine/tree.js';
 import { loadBooklet, addCard } from '../js/booklet.js';
 import { GAME_TITLE } from '../js/config.js';
+import { karmaChoiceLists } from './helpers/karmaLists.js';
 
 const modules = import.meta.glob('../js/data/*.json', { eager: true });
 const FILES = {};
@@ -51,6 +52,16 @@ function expectedRaw(screens, { acceptBranch } = {}) {
   return { raw, max };
 }
 
+// 道德抉擇（scene 節點／見聞殿 mercy）：選項位置已打散，善向取 delta 最大、惡向取 delta 最小。
+// 用按鈕文字對回該站 JSON 的選項列表，不靠順序。
+function karmaIndex(data, buttons, evil) {
+  const texts = [...buttons].map((b) => b.textContent);
+  const list = karmaChoiceLists(data).find((l) => l.length === texts.length && l.every((c, i) => c.text === texts[i]));
+  if (!list) throw new Error(`autoplay：找不到對應的道德抉擇（${texts.join(' / ')}）`);
+  const deltas = list.map((c) => c.karma?.delta ?? 0);
+  return deltas.indexOf(evil ? Math.min(...deltas) : Math.max(...deltas));
+}
+
 function autoplay(root, storage, { acceptBranch = true, evil = false } = {}) {
   for (let i = 0; i < 3000; i++) {
     if (root.querySelector('.finale-end')) return;
@@ -68,11 +79,13 @@ function autoplay(root, storage, { acceptBranch = true, evil = false } = {}) {
     const choices = root.querySelectorAll('.btn-choice');
     if (choices.length) {
       const list = choices[0].closest('.choices');
+      const kind = list?.dataset.kind;
       let idx = 0;
-      if (list?.dataset.kind === 'case') idx = data.cases[Number(list.dataset.index)].answer;
-      else if (list?.dataset.kind === 'quiz') idx = data.quiz.answer;
-      else if (list?.dataset.kind === 'guest') idx = data.guests[Number(list.dataset.index)].quiz.answer;
-      else if (evil) idx = choices.length - 1; // 道德選擇全選最惡（末選項慣例）
+      if (kind === 'case') idx = data.cases[Number(list.dataset.index)].answer;
+      else if (kind === 'quiz') idx = data.quiz.answer;
+      else if (kind === 'guest') idx = data.guests[Number(list.dataset.index)].quiz.answer;
+      else if (kind === 'repent') idx = evil ? choices.length - 1 : 0; // 地官補過清單依五軸順序列傷軸，惡向取末項＝信
+      else if (list) idx = karmaIndex(data, choices, evil); // 道德抉擇：依 delta 挑善／惡，不靠位置
       choices[idx].click();
       continue;
     }

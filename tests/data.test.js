@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { AXES } from '../js/state.js';
 import { SOURCE_BASE, SOURCE_CHAPTERS } from '../js/config.js';
 import prologue from '../js/data/prologue.json';
+import { karmaChoiceLists } from './helpers/karmaLists.js';
 
 const modules = import.meta.glob('../js/data/*.json', { eager: true });
 const FILES = {};
@@ -31,11 +32,9 @@ function validateScene(scene) {
     if (node.type === 'line') expect(ids.has(node.next)).toBe(true);
     if (node.type === 'choice') {
       expect(node.choices.length).toBeGreaterThanOrEqual(2);
-      // autoplay 慣例：choices[0] 必為最善（無 karma 或 delta ≥ 0）
-      if (node.choices[0].karma) expect(node.choices[0].karma.delta).toBeGreaterThanOrEqual(0);
-      // autoplay 慣例：凡帶 karma 的選擇列表，最末選項必為最惡（delta ≤ 0）
+      // 帶 karma 的抉擇：三選項 delta 恰為 +1／0／−1 各一；位置不拘（打散守門見「道德抉擇選項位置打散」）
       if (node.choices.some((c) => c.karma)) {
-        expect(node.choices.at(-1).karma?.delta ?? 0).toBeLessThanOrEqual(0);
+        expect(node.choices.map((c) => c.karma?.delta ?? 0).sort((a, b) => a - b)).toEqual([-1, 0, 1]);
       }
       for (const c of node.choices) {
         expect(ids.has(c.next)).toBe(true);
@@ -63,10 +62,7 @@ function validateReactionChoices(choices) {
     if (c.karma) expectKarma(c.karma);
   }
   const deltas = choices.map((c) => c.karma?.delta ?? 0);
-  expect(deltas).toContain(1);   // 至少一善
-  expect(deltas).toContain(-1);  // 至少一惡
-  expect(deltas[0]).toBeGreaterThanOrEqual(0); // choices[0] 最善慣例
-  expect(deltas.at(-1)).toBeLessThanOrEqual(0); // 最末選項最惡慣例
+  expect(deltas.sort((a, b) => a - b)).toEqual([-1, 0, 1]); // 善／平／惡各一，位置不拘
 }
 
 function validateVisit(v) {
@@ -256,12 +252,12 @@ describe('序章專屬驗證', () => {
     expect(axesUsed.length).toBe(AXES.length);
     expect([...axesUsed].sort()).toEqual([...AXES].sort());
   });
-  it('五個抉擇節點皆有 label，且三選項為 善／中／惡（+1／0／−1）', () => {
+  it('五個抉擇節點皆有 label，且三選項為 善／中／惡（+1／0／−1）各一，位置不拘', () => {
     const nodes = prologue.nodes.filter((n) => n.type === 'choice');
     expect(nodes.length).toBe(5);
     for (const n of nodes) {
       expect(n.label.length).toBeGreaterThan(0);
-      expect(n.choices.map((c) => c.karma.delta)).toEqual([1, 0, -1]);
+      expect(n.choices.map((c) => c.karma.delta).sort((a, b) => a - b)).toEqual([-1, 0, 1]);
     }
   });
   it('節點級 art 皆存在於 assets/art', () => {
@@ -319,7 +315,7 @@ describe('scene 站天音卡', () => {
 // ---------- 孝子殿專屬 ----------
 
 describe('孝子殿專屬驗證', () => {
-  it('三段抉擇軸恰為 ren／xin／yi 各一，delta 皆為 [1, 0, -1]，且附天音卡', () => {
+  it('三段抉擇軸恰為 ren／xin／yi 各一，delta 各為 +1／0／−1（位置不拘），且附天音卡', () => {
     const xiaozi = FILES['xiaozi.json'];
     const nodes = xiaozi.nodes.filter((n) => n.type === 'choice');
     expect(nodes.length).toBe(3);
@@ -327,7 +323,7 @@ describe('孝子殿專屬驗證', () => {
     expect([...axes].sort()).toEqual(['ren', 'xin', 'yi']);
     for (const n of nodes) {
       expect(n.label.length).toBeGreaterThan(0);
-      expect(n.choices.map((c) => c.karma.delta)).toEqual([1, 0, -1]);
+      expect(n.choices.map((c) => c.karma.delta).sort((a, b) => a - b)).toEqual([-1, 0, 1]);
     }
     validateCard(xiaozi.card);
   });
@@ -374,5 +370,35 @@ describe('精簡版站序（規格 §二 七站）', () => {
     expect(flow.modes.lite).toEqual([
       'prologue', 'interlude', 'sapling', 'gate', 'donghua', 'beihua', 'sanguan', 'yinyang', 'yaochi',
     ]);
+  });
+});
+
+// ---------- 道德抉擇位置打散（使用者 2026-09-14 指定：正解不可固定在第 1 個） ----------
+
+describe('道德抉擇選項位置打散', () => {
+  const listsOf = (ids) => ids.flatMap((id) => karmaChoiceLists(FILES[flow.screens.find((s) => s.id === id).src]));
+  const lists = listsOf(flow.screens.map((s) => s.id));
+  const positionsOf = (group, delta) => group.map((l) => l.findIndex((c) => (c.karma?.delta ?? 0) === delta));
+  const countByPosition = (positions) => [0, 1, 2].map((p) => positions.filter((x) => x === p).length);
+
+  it('全遊戲共 16 組帶 karma 的三選項抉擇', () => {
+    expect(lists.length).toBe(16);
+    for (const l of lists) expect(l.length).toBe(3);
+  });
+  it('最善（+1）落在三個位置各至少四分之一', () => {
+    const min = Math.floor(lists.length / 4);
+    for (const n of countByPosition(positionsOf(lists, 1))) expect(n).toBeGreaterThanOrEqual(min);
+  });
+  it('最惡（−1）落在三個位置各至少四分之一', () => {
+    const min = Math.floor(lists.length / 4);
+    for (const n of countByPosition(positionsOf(lists, -1))) expect(n).toBeGreaterThanOrEqual(min);
+  });
+  it('序章連續五題：最善位置不連續相同', () => {
+    const pos = positionsOf(listsOf(['prologue']), 1);
+    expect(pos.length).toBe(5);
+    for (let i = 1; i < pos.length; i++) expect(pos[i], `第 ${i + 1} 題`).not.toBe(pos[i - 1]);
+  });
+  it('精簡版看得到的抉擇：最善三個位置都出現過', () => {
+    for (const n of countByPosition(positionsOf(listsOf(flow.modes.lite), 1))) expect(n).toBeGreaterThanOrEqual(1);
   });
 });
