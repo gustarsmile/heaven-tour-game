@@ -18,13 +18,15 @@
 ## 構圖與規格
 
 - 橫式場景 3:2（生成 1536×1024，壓成 1024×683）；立繪直式 2:3（683×1024）。
-- 樹況五級（tree-1～tree-5）：同一構圖置中、樹上掛空白木牌、背景雲海金光；`tree-4` 以現有入庫圖為基準，其餘四級用它當參考圖只改樹況（枯萎／稀疏／平常／結果纍纍）。
+- 樹況五級（tree-1～tree-5）＋樹苗：同一構圖置中、樹上掛空白木牌（原著第 13 回「牌上寫著自己的名字」；留白因畫中不得有字）、背景雲海金光，**上緣不帶廟簷邊框**（2026-11-03 使用者裁決：先用「廟繪版去屋簷」；自然水彩版兩輪候選保留在 `art-src/_candidates/20261103-natural*/` 供日後改用）。產製法：以 `tree-4` 為 `--edit` 參考圖只改樹況，再用一次 `--edit` 把廟簷拿掉、以天青天空與雲海補滿。
 - 產製：draw 技能（`python C:/Users/yoyoc/.claude/skills/draw/draw.py "<前綴><描述>" --edit <參考圖> --size 1536x1024 --quality low`）→ `art-src/<name>.png` → `npm run opt-art`（webp q60；同時由 `art-src/cover.png` 產 `assets/og.png`）。
 - 美術總體積守門 6MB（`tests/art.test.js`）。
 - 分享卡底圖 share-bg：直式 2:3，上緣瑤池宮闕、下緣金色蓮台、中央淡雲留白供文字；卡面文字用淺色配色（js/share.js 的 C 色票與 CSS :root 同步）。
 
-## 入庫狀態（階段 1）
+## 入庫狀態（2026-11-03）
 
-正式圖：`cover`、`gate-scene`、`interlude-night`、`donghua-scene`、`tree-4`、`share-bg`、`jigong-main`
+正式圖 13 張：`cover`、`gate-scene`、`interlude-night`、`donghua-scene`、`share-bg`、`jigong-main`、**`tree-sapling`、`tree-1`～`tree-5`**（樹況六張 2026-11-03 入庫，廟繪去屋簷版；`tree-4` 原含屋簷版備份在 `art-src/_candidates/20261103/`）。
 
-占位圖（待量產）：`prologue-scene`、`interlude-lotus`、`tree-sapling`、`case-1`～`case-4`、`tree-1`、`tree-2`、`tree-3`、`tree-5`、`yaochi-scene`
+占位圖（待量產 19 張）：`prologue-scene`、`interlude-lotus`、`case-1`～`case-4`、`yaochi-scene`、`sanqinghe`／`nanhua`／`xihua`／`beihua`／`zhonghua`／`kongzi`／`shijia`／`guanyin`／`zhongyi`／`xiaozi`／`baxian`／`sanguan`／`yinyang`（皆 `-scene`）。完整清單以 `scripts/art-manifest.mjs` 為準。
+
+候選圖資料夾慣例：`art-src/_candidates/<日期>[-系列]/`（被 `.gitignore` 的 `art-src/` 涵蓋，不進 repo），每輪附 `_對照表-*.jpg` 供比對。
