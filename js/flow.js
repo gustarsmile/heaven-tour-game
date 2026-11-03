@@ -132,36 +132,50 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     step();
   }
 
-  function runVisit(data, onEnd) {
-    const visit = createVisit(data, hooks);
+  // 分段關卡共用驅動：見聞殿／樹畫面／陰陽界三個引擎結構相同——phases 陣列＋phase 游標、
+  // 上一階段回看、考題答對響鈴／答錯留提示重答、完成時入帳功德。各站只補自己的 handlers。
+  function runPhased(m, { next, prev, score, render, handlers: extra = () => ({}) }, onEnd) {
     let message = '';
     const step = () => {
-      setLocalBack(visit.phase !== visit.phases[0]
-        ? () => { message = ''; prevVisitPhase(visit); step(); }
+      setLocalBack(m.phase !== m.phases[0]
+        ? () => { message = ''; prev(m); step(); }
         : null);
-      renderVisitPhase(visit, handlers, root, message);
+      render(m, handlers, message);
+    };
+    // 考題處理器：首答對 5 分、答錯顯示提示重答（規則在各引擎的 answer*；hint 延遲取值，因為題號看當前 phase）
+    const onAnswer = (answer, hint) => (i) => {
+      const r = answer(m, i);
+      if (r.correct) audio.chime();
+      message = r.correct ? '' : hint();
+      step();
     };
     const handlers = {
-      onNextPhase: () => { message = ''; nextVisitPhase(visit); step(); },
-      onQuiz: (i) => {
-        const r = answerQuiz(visit, i);
-        if (r.correct) audio.chime();
-        message = r.correct ? '' : data.quiz.hint;
-        step();
-      },
-      onMercy: (i) => { chooseMercy(visit, i); step(); },
-      onBranchAccept: () => {
-        takeBranch(visit, true);
-        runScene(data.branch.scene, () => {
-          creditWu(state, currentScreenId, data.branch.rewardWu ?? 0); // 隱藏功德，不顯示訊息
-          nextVisitPhase(visit);
-          step();
-        });
-      },
-      onBranchDecline: () => { takeBranch(visit, false); step(); },
-      onFinish: () => { creditWu(state, currentScreenId, visitScore(visit)); onEnd(); },
+      onNextPhase: () => { message = ''; next(m); step(); },
+      onFinish: () => { creditWu(state, currentScreenId, score(m)); onEnd(); },
+      ...extra({ step, onAnswer }),
     };
     step();
+  }
+
+  function runVisit(data, onEnd) {
+    const visit = createVisit(data, hooks);
+    runPhased(visit, {
+      next: nextVisitPhase, prev: prevVisitPhase, score: visitScore,
+      render: (v, h, message) => renderVisitPhase(v, h, root, message),
+      handlers: ({ step, onAnswer }) => ({
+        onQuiz: onAnswer(answerQuiz, () => data.quiz.hint),
+        onMercy: (i) => { chooseMercy(visit, i); step(); },
+        onBranchAccept: () => {
+          takeBranch(visit, true);
+          runScene(data.branch.scene, () => {
+            creditWu(state, currentScreenId, data.branch.rewardWu ?? 0); // 隱藏功德，不顯示訊息
+            nextVisitPhase(visit);
+            step();
+          });
+        },
+        onBranchDecline: () => { takeBranch(visit, false); step(); },
+      }),
+    }, onEnd);
   }
 
   function runTree(data, onEnd) {
@@ -170,25 +184,14 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
       ? { amends: remainingAmends(modeList, resources, currentScreenId) }
       : {};
     const t = createTreeScreen(data, extras);
-    let message = '';
-    const step = () => {
-      setLocalBack(t.phase !== t.phases[0]
-        ? () => { message = ''; prevTreePhase(t); step(); }
-        : null);
-      renderTreePhase(t, state, treeData, handlers, root, message);
-    };
-    const handlers = {
-      onNextPhase: () => { message = ''; nextTreePhase(t); step(); },
-      onCase: (i) => {
-        const r = answerCase(t, i);
-        if (r.correct) audio.chime();
-        message = r.correct ? '' : data.cases[caseIndex(t)].hint;
-        step();
-      },
-      onRepent: (axis) => { setRepent(state, axis, currentScreenId); audio.chime(); step(); }, // 限一次：視圖見 state.repent 即不再出選項
-      onFinish: () => { creditWu(state, currentScreenId, treeScore(t)); onEnd(); },
-    };
-    step();
+    runPhased(t, {
+      next: nextTreePhase, prev: prevTreePhase, score: treeScore,
+      render: (m, h, message) => renderTreePhase(m, state, treeData, h, root, message),
+      handlers: ({ step, onAnswer }) => ({
+        onCase: onAnswer(answerCase, () => data.cases[caseIndex(t)].hint),
+        onRepent: (axis) => { setRepent(state, axis, currentScreenId); audio.chime(); step(); }, // 限一次：視圖見 state.repent 即不再出選項
+      }),
+    }, onEnd);
   }
 
   // 站名表：樹的來歷／通天五段回放用來把 choice.screen 換成站名（choice 有 label 者優先用 label）
@@ -198,24 +201,13 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
 
   function runReview(data, onEnd) {
     const r = createReview(data);
-    let message = '';
-    const step = () => {
-      setLocalBack(r.phase !== r.phases[0]
-        ? () => { message = ''; prevReviewPhase(r); step(); }
-        : null);
-      renderReviewPhase(r, state, screenTitles(), handlers, root, message);
-    };
-    const handlers = {
-      onNextPhase: () => { message = ''; nextReviewPhase(r); step(); },
-      onGuest: (i) => {
-        const res = answerGuest(r, i);
-        if (res.correct) audio.chime();
-        message = res.correct ? '' : data.guests[guestIndex(r)].quiz.hint;
-        step();
-      },
-      onFinish: () => { creditWu(state, currentScreenId, reviewScore(r)); onEnd(); },
-    };
-    step();
+    runPhased(r, {
+      next: nextReviewPhase, prev: prevReviewPhase, score: reviewScore,
+      render: (m, h, message) => renderReviewPhase(m, state, screenTitles(), h, root, message),
+      handlers: ({ onAnswer }) => ({
+        onGuest: onAnswer(answerGuest, () => data.guests[guestIndex(r)].quiz.hint),
+      }),
+    }, onEnd);
   }
 
   function bookletEntries() {
@@ -320,35 +312,16 @@ export async function startGame({ root, loadJSON = fetchJSON, storage, audio = N
     const goNext = nextScr ? () => goTo(nextScr.id) : showCover;
     const collectCard = () => { addCard(scr.id, storage); goNext(); };
     const data = resources[scr.id];
+    // 站末天音卡：翻頁音→收進善書冊→下一站；無卡的站直接前進
+    const showCard = data?.card
+      ? () => { audio.flip(); setLocalBack(null); renderCard(data.card, collectCard, root); }
+      : goNext;
+    const PHASED = { visit: runVisit, tree: runTree, review: runReview };
 
     if (scr.type === 'scene') {
-      runScene(data, data.card ? () => {
-        audio.flip();
-        setLocalBack(null);
-        renderCard(data.card, collectCard, root);
-      } : goNext);
-    } else if (scr.type === 'visit') {
-      runScene(linesToScene(data.intro, data.art?.scene), () =>
-        runVisit(data, () => {
-          audio.flip();
-          setLocalBack(null);
-          renderCard(data.card, collectCard, root);
-        }));
-    } else if (scr.type === 'tree') {
-      runScene(linesToScene(data.intro, data.art?.scene), () =>
-        runTree(data, () => {
-          if (!data.card) { goNext(); return; }
-          audio.flip();
-          setLocalBack(null);
-          renderCard(data.card, collectCard, root);
-        }));
-    } else if (scr.type === 'review') {
-      runScene(linesToScene(data.intro, data.art?.scene), () =>
-        runReview(data, () => {
-          audio.flip();
-          setLocalBack(null);
-          renderCard(data.card, collectCard, root);
-        }));
+      runScene(data, showCard);
+    } else if (PHASED[scr.type]) {
+      runScene(linesToScene(data.intro, data.art?.scene), () => PHASED[scr.type](data, showCard));
     } else if (scr.type === 'finale') {
       runScene(linesToScene(data.intro, data.art?.scene), () => runFinale(data));
     } else {
