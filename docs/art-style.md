@@ -25,8 +25,8 @@
 
 ## 入庫狀態（2026-11-03）
 
-正式圖 13 張：`cover`、`gate-scene`、`interlude-night`、`donghua-scene`、`share-bg`、`jigong-main`、**`tree-sapling`、`tree-1`～`tree-5`**（樹況六張 2026-11-03 入庫，廟繪去屋簷版；`tree-4` 原含屋簷版備份在 `art-src/_candidates/20261103/`）。
+正式圖 17 張：`cover`、`gate-scene`、`interlude-night`、`donghua-scene`、`share-bg`、`jigong-main`、**`tree-sapling`、`tree-1`～`tree-5`、`case-1`～`case-4`**（樹況六張＋案例樹四張 2026-11-03 入庫，皆以去屋簷版 `tree-4` 為參考圖改樹況；`tree-4` 原含屋簷版備份在 `art-src/_candidates/20261103/`）。
 
-占位圖（待量產 19 張）：`prologue-scene`、`interlude-lotus`、`case-1`～`case-4`、`yaochi-scene`、`sanqinghe`／`nanhua`／`xihua`／`beihua`／`zhonghua`／`kongzi`／`shijia`／`guanyin`／`zhongyi`／`xiaozi`／`baxian`／`sanguan`／`yinyang`（皆 `-scene`）。完整清單以 `scripts/art-manifest.mjs` 為準。
+占位圖（待量產 15 張）：`prologue-scene`、`interlude-lotus`、`yaochi-scene`、`sanqinghe`／`nanhua`／`xihua`／`beihua`／`zhonghua`／`kongzi`／`shijia`／`guanyin`／`zhongyi`／`xiaozi`／`baxian`／`sanguan`／`yinyang`（皆 `-scene`）。完整清單以 `scripts/art-manifest.mjs` 為準。
 
 候選圖資料夾慣例：`art-src/_candidates/<日期>[-系列]/`（被 `.gitignore` 的 `art-src/` 涵蓋，不進 repo），每輪附 `_對照表-*.jpg` 供比對。
