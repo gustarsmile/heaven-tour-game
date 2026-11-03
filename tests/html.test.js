@@ -11,6 +11,10 @@ describe('index.html 頁首', () => {
     expect(html).toMatch(/name="description"/);
     expect(html).toMatch(/name="theme-color" content="#f4ecd9"/);
   });
+  it('GA4 gtag 已接上評估 ID（G-R9L64DTE0T）', () => {
+    expect(html).toContain('googletagmanager.com/gtag/js?id=G-R9L64DTE0T');
+    expect(html).toContain("gtag('config', 'G-R9L64DTE0T')");
+  });
   it('og 標籤指向 GAME_URL', async () => {
     const { GAME_URL } = await import('../js/config.js');
     expect(html).toContain(`property="og:url" content="${GAME_URL}"`);
