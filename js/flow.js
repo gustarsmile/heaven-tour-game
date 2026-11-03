@@ -24,8 +24,8 @@ import { buildShareCard, loadQrImage, loadArtImage } from './share.js';
 import { collectArtFiles, preloadArt } from './preload.js';
 
 export const MODES = {
-  full: { label: '完整遊歷', desc: '十三站全程・約 30–60 分鐘' },
-  lite: { label: '精簡速覽', desc: '精選七站・約 12–20 分鐘' },
+  full: { label: '完整遊歷', desc: '十六站全程・約 40–75 分鐘' },
+  lite: { label: '精簡速覽', desc: '精選六站・約 20–40 分鐘' },
 };
 
 async function fetchJSON(path) {
