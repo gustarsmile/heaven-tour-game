@@ -14,6 +14,7 @@
 - **齊天大聖**：一律以親子版原圖 `C:\Users\yoyoc\Projects\hell-tour-family\art-src\gate-nantianmen.png` 當參考圖：「圓潤可愛的金毛猴形天將、金色鎧甲、金色長棒、笑意」。
 - **玩家（主角）**：現代小男孩約十歲、短髮、淺色現代睡衣；場景為現代臥室（書桌、檯燈、電腦椅），不用古裝、不用古畫。
 - 人物須完整在畫面／窗框內，帽頂上方留空，不得被邊框切到。
+- 群像場景（瑤池等）：仙女穿長袖寬袍＋披帛、不露肩腰（親子標準）；雲只鋪地平線一層、天空保持通透；除仙女外要有各路仙佛（仙翁、道長、天王、和尚、文官、菩薩、仙童、樂仙）增加可看性（2026-11-03 使用者指示）。
 
 ## 構圖與規格
 
@@ -25,8 +26,8 @@
 
 ## 入庫狀態（2026-11-03）
 
-正式圖 17 張：`cover`、`gate-scene`、`interlude-night`、`donghua-scene`、`share-bg`、`jigong-main`、**`tree-sapling`、`tree-1`～`tree-5`、`case-1`～`case-4`**（樹況六張＋案例樹四張 2026-11-03 入庫，皆以去屋簷版 `tree-4` 為參考圖改樹況；`tree-4` 原含屋簷版備份在 `art-src/_candidates/20261103/`）。
+正式圖 20 張：`cover`、`gate-scene`、`interlude-night`、`donghua-scene`、`share-bg`、`jigong-main`、`prologue-scene`、`interlude-lotus`、`yaochi-scene`、**`tree-sapling`、`tree-1`～`tree-5`、`case-1`～`case-4`**（樹況六張＋案例樹四張 2026-11-03 入庫，皆以去屋簷版 `tree-4` 為參考圖改樹況；`tree-4` 原含屋簷版備份在 `art-src/_candidates/20261103/`）。
 
-占位圖（待量產 15 張）：`prologue-scene`、`interlude-lotus`、`yaochi-scene`、`sanqinghe`／`nanhua`／`xihua`／`beihua`／`zhonghua`／`kongzi`／`shijia`／`guanyin`／`zhongyi`／`xiaozi`／`baxian`／`sanguan`／`yinyang`（皆 `-scene`）。完整清單以 `scripts/art-manifest.mjs` 為準。
+占位圖（待量產 12 張，皆宮殿場景）：`sanqinghe`／`nanhua`／`xihua`／`beihua`／`zhonghua`／`kongzi`／`shijia`／`guanyin`／`zhongyi`／`xiaozi`／`baxian`／`sanguan`／`yinyang`（皆 `-scene`）。完整清單以 `scripts/art-manifest.mjs` 為準。
 
 候選圖資料夾慣例：`art-src/_candidates/<日期>[-系列]/`（被 `.gitignore` 的 `art-src/` 涵蓋，不進 repo），每輪附 `_對照表-*.jpg` 供比對。
