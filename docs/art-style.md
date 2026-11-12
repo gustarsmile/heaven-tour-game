@@ -27,8 +27,8 @@
 
 ## 入庫狀態（2026-11-03）
 
-正式圖 24 張：`cover`、`gate-scene`、`interlude-night`、`share-bg`、`jigong-main`、`prologue-scene`、`interlude-lotus`、`yaochi-scene`、`tree-sapling`、`tree-1`～`tree-5`、`case-1`～`case-4`、**`sanqinghe-scene`、`donghua-scene`、`nanhua-scene`、`xihua-scene`、`beihua-scene`、`zhonghua-scene`**（六張宮殿 Q 版 2026-11-12 入庫；`donghua-scene` 取代 8 月的寫實比例版，舊圖備份在 `art-src/_candidates/20261112-replaced/`）。
+正式圖 32 張（manifest 全數到位，2026-11-12）：`cover`、`gate-scene`、`interlude-night`、`share-bg`、`jigong-main`、`prologue-scene`、`interlude-lotus`、`yaochi-scene`、`tree-sapling`、`tree-1`～`tree-5`、`case-1`～`case-4`，以及十四張 Q 版宮殿場景：`sanqinghe`、`donghua`、`nanhua`、`xihua`、`beihua`、`zhonghua`、`kongzi`、`shijia`、`guanyin`、`sanguan`、`zhongyi`、`xiaozi`、`yinyang`、`baxian`（皆 `-scene`；`donghua-scene` 的 8 月寫實比例舊圖備份在 `art-src/_candidates/20261112-replaced/`）。
 
-占位圖（待量產 8 張，皆宮殿場景）：`kongzi`／`shijia`／`guanyin`／`sanguan`／`zhongyi`／`xiaozi`／`baxian`／`yinyang`（皆 `-scene`）。完整清單以 `scripts/art-manifest.mjs` 為準。（先前幾版把正式圖多算一張，以本行為準：32＝24＋8。）
+占位圖：無。與劇本的已知小出入（使用者 2026-11-12 過目後照收）：`baxian-scene` 張果老正騎驢（旁白寫倒騎）；`xiaozi-scene` 全員古裝（旁白寫古裝與現代衣服都有）；`yinyang-scene` 往下走的人因 Q 版比例看起來像小孩；`zhonghua-scene` 匾額有幾筆像字的花紋。
 
 候選圖資料夾慣例：`art-src/_candidates/<日期>[-系列]/`（被 `.gitignore` 的 `art-src/` 涵蓋，不進 repo），每輪附 `_對照表-*.jpg` 供比對。
