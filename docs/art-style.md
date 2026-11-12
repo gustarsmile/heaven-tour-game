@@ -15,6 +15,7 @@
 - **玩家（主角）**：現代小男孩約十歲、短髮、淺色現代睡衣；場景為現代臥室（書桌、檯燈、電腦椅），不用古裝、不用古畫。
 - 人物須完整在畫面／窗框內，帽頂上方留空，不得被邊框切到。
 - 群像場景（瑤池等）：仙女穿長袖寬袍＋披帛、不露肩腰（親子標準）；雲只鋪地平線一層、天空保持通透；除仙女外要有各路仙佛（仙翁、道長、天王、和尚、文官、菩薩、仙童、樂仙）增加可看性（2026-11-03 使用者指示）。
+- 宮殿場景（三清河、五華宮等，2026-11-12 使用者指示）：**宮殿造型與帝君服飾參考漫畫版《天堂遊記》**（雲端 `Game\天堂遊記.pdf`，檔案頁＝頁碼＋2）——把漫畫的「宮殿格＋帝君格」裁出、拼成 1536×1024 參考圖放 `art-src/_candidates/<日期>-comic-ref/`，用 `--edit` 重畫成全彩廟繪。**帝君／仙真畫成 Q 版**（約三頭身、圓臉、大眼、親切笑容），構圖為「左後宮殿＋右前帝君坐祥雲」；匾額留空、不畫濟公與男孩。同批出過寫實比例垂目的莊嚴版（`art-src/_candidates/20261112-palaces-dignified/`），使用者比較後選 Q 版。
 
 ## 構圖與規格
 
@@ -26,8 +27,8 @@
 
 ## 入庫狀態（2026-11-03）
 
-正式圖 20 張：`cover`、`gate-scene`、`interlude-night`、`donghua-scene`、`share-bg`、`jigong-main`、`prologue-scene`、`interlude-lotus`、`yaochi-scene`、**`tree-sapling`、`tree-1`～`tree-5`、`case-1`～`case-4`**（樹況六張＋案例樹四張 2026-11-03 入庫，皆以去屋簷版 `tree-4` 為參考圖改樹況；`tree-4` 原含屋簷版備份在 `art-src/_candidates/20261103/`）。
+正式圖 24 張：`cover`、`gate-scene`、`interlude-night`、`share-bg`、`jigong-main`、`prologue-scene`、`interlude-lotus`、`yaochi-scene`、`tree-sapling`、`tree-1`～`tree-5`、`case-1`～`case-4`、**`sanqinghe-scene`、`donghua-scene`、`nanhua-scene`、`xihua-scene`、`beihua-scene`、`zhonghua-scene`**（六張宮殿 Q 版 2026-11-12 入庫；`donghua-scene` 取代 8 月的寫實比例版，舊圖備份在 `art-src/_candidates/20261112-replaced/`）。
 
-占位圖（待量產 12 張，皆宮殿場景）：`sanqinghe`／`nanhua`／`xihua`／`beihua`／`zhonghua`／`kongzi`／`shijia`／`guanyin`／`zhongyi`／`xiaozi`／`baxian`／`sanguan`／`yinyang`（皆 `-scene`）。完整清單以 `scripts/art-manifest.mjs` 為準。
+占位圖（待量產 8 張，皆宮殿場景）：`kongzi`／`shijia`／`guanyin`／`sanguan`／`zhongyi`／`xiaozi`／`baxian`／`yinyang`（皆 `-scene`）。完整清單以 `scripts/art-manifest.mjs` 為準。（先前幾版把正式圖多算一張，以本行為準：32＝24＋8。）
 
 候選圖資料夾慣例：`art-src/_candidates/<日期>[-系列]/`（被 `.gitignore` 的 `art-src/` 涵蓋，不進 repo），每輪附 `_對照表-*.jpg` 供比對。
