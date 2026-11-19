@@ -13,7 +13,7 @@
 
 ## 部署（GitHub Pages）
 
-正式網址：`https://gustarsmile.github.io/heaven-tour-game/`（`js/config.js` 的 `GAME_URL`）。改網址三步驟：改 `GAME_URL` → `npm run gen-qr` → `npx vitest run tests/qr.test.js`。`index.html` 的 og 標籤由 `tests/html.test.js` 守門與 `GAME_URL` 一致。GA 量測 ID 尚未加入（需要時在 `index.html` `<head>` 加 gtag 片段）。
+正式網址：`https://edu.omilkyway.org/heaven-tour-game/`（`js/config.js` 的 `GAME_URL`）。改網址三步驟：改 `GAME_URL` → `npm run gen-qr` → `npx vitest run tests/qr.test.js`。`index.html` 的 og 標籤由 `tests/html.test.js` 守門與 `GAME_URL` 一致。GA 量測 ID 尚未加入（需要時在 `index.html` `<head>` 加 gtag 片段）。
 
 ## 資料驅動
 

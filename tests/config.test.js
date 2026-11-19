@@ -9,7 +9,7 @@ describe('config', () => {
     expect(WU_CAP).toBe(100);
   });
   it('部署網址與原著網址基底', () => {
-    expect(GAME_URL).toBe('https://gustarsmile.github.io/heaven-tour-game/');
+    expect(GAME_URL).toBe('https://edu.omilkyway.org/heaven-tour-game/');
     expect(SOURCE_BASE).toBe('https://www.taolibrary.com/category/category48/c48001b');
   });
 });
